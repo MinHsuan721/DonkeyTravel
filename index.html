@@ -1452,12 +1452,7 @@
     function handleLogout() { showCustomDialog("確定要登出嗎？", true, () => { withLoader(() => { currentUser = null; currentProjectId = null; localStorage.removeItem('app_savedUser'); localStorage.removeItem('app_lastProj'); if(syncInterval) clearInterval(syncInterval); switchView('login-view'); const pwdInput = document.getElementById('password-input'); if(pwdInput) pwdInput.value = ''; }, 400); }); }
     function openModal(id) { const el = document.getElementById(id); if (el) el.classList.add('active'); }
     function closeModal(id) { const el = document.getElementById(id); if (el) el.classList.remove('active'); }
-    function saveNewUser() { 
-        const nameInput = document.getElementById('new-user-name'); const name = nameInput ? nameInput.value.trim() : ''; const pwdInput = document.getElementById('new-user-pwd'); const pwd = pwdInput ? pwdInput.value.trim() : ''; 
-        if(!name || !pwd) return showCustomDialog("請輸入完整名稱與密碼"); if(authRules[name]) return showCustomDialog("此名稱已存在"); 
-        customUsers[name] = pwd; authRules = { ...baseAuthRules, ...customUsers }; allMembers = Object.keys(authRules); saveUsersDB(); 
-        renderUserSelect(); closeModal('add-user-modal'); const userSel = document.getElementById('user-select'); if(userSel) userSel.value = name; const passInput = document.getElementById('password-input'); if(passInput) passInput.value = pwd; 
-    }
+    function saveNewUser() { const name = document.getElementById('new-user-name').value.trim(); const pwd = document.getElementById('new-user-pwd').value.trim(); if(!name || !pwd) return alert("請輸入完整名稱與密碼"); if(authRules[name]) return alert("此名稱已存在"); customUsers[name] = pwd; saveUsersDB(); authRules = { ...customUsers }; allMembers = Object.keys(authRules); renderUserSelect(); closeModal('add-user-modal'); document.getElementById('user-select').value = name; document.getElementById('password-input').value = pwd; }
     
     function closeManageMembers() { withLoader(() => { safeRenderAll(); closeModal('manage-members-modal'); }); }
     function closeSplitExclusion() { withLoader(() => { renderBudget(); closeModal('split-exclusion-modal'); }); }
