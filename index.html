@@ -950,20 +950,21 @@
   </div>
 
   <script>
-    // ==========================================
-    // 🚀 Firebase 初始化區塊 (請替換為您的 Config)
+ // ==========================================
+    // 🚀 Firebase 初始化區塊
     // ==========================================
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyCD7FwBFM5cnwboweNLI9mTLr5qnpz-CeA",
+      authDomain: "donkeytravel-cb207.firebaseapp.com",
+      projectId: "donkeytravel-cb207",
+      storageBucket: "donkeytravel-cb207.firebasestorage.app",
+      messagingSenderId: "387903131455",
+      appId: "1:387903131455:web:88171dc06f6378ca170d8a",
+      measurementId: "G-GS4HBMEF1Q"
     };
     
     // 初始化 Firebase
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const fsDb = firebase.firestore();
     
     let currentUser = null; let currentWorkspace = 'DonkeyTravel'; let currentProjectId = null; let activeDayIndex = 0;
@@ -1173,100 +1174,70 @@
         }
     }
 
-    const baseAuthRules = { '魏嘉宏': '35195', '魏卉姍': '35195', '魏敏軒': '35195', '魏珮芯': '35195', '陳筱雙': '1206' };
-    let customUsers = {};
-    try { const rawUsers = localStorage.getItem(`app_users_${currentWorkspace}`); if (rawUsers) { const parsed = JSON.parse(rawUsers); if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) customUsers = parsed; } } catch(e) {}
-    if(Object.keys(customUsers).length === 0) { customUsers = { ...baseAuthRules }; localStorage.setItem(`app_users_${currentWorkspace}`, JSON.stringify(customUsers)); } 
-    else { Object.keys(baseAuthRules).forEach(k => { if(customUsers[k] === undefined) customUsers[k] = baseAuthRules[k]; }); localStorage.setItem(`app_users_${currentWorkspace}`, JSON.stringify(customUsers)); }
-    let authRules = { ...customUsers }; let allMembers = Object.keys(authRules);
+   // 全域名單配置 (純依賴本地快取與 Firebase)
+    let customUsers = JSON.parse(localStorage.getItem(`app_users_${currentWorkspace}`)) || {};
+    let authRules = { ...customUsers };
+    let allMembers = Object.keys(authRules);
 
-    // ==========================================
-    // ☁️ Firebase 資料存取與同步核心 (取代原本的 GAS fetch)
+// ==========================================
+    // ☁️ Firebase 資料存取與同步核心 (完全取代 GAS)
     // ==========================================
     async function syncFromCloud(showMsg = false, isBackground = false) {
-        if (isSaving) return; 
         if(showMsg && !isBackground) showSync("☁️ 雲端同步中...");
-
         try {
-            // 1. 同步使用者名單
-            const userDoc = await fsDb.collection('workspaces').doc(currentWorkspace).collection('settings').doc('users').get();
-            if (userDoc.exists) {
-                const newUsersData = userDoc.data();
-                const mergedUsers = { ...baseAuthRules, ...customUsers, ...newUsersData };
-                if (JSON.stringify(customUsers) !== JSON.stringify(mergedUsers)) { 
-                    customUsers = mergedUsers; authRules = { ...customUsers }; allMembers = Object.keys(authRules); 
-                    localStorage.setItem(`app_users_${currentWorkspace}`, JSON.stringify(customUsers)); 
-                    if (document.getElementById('user-select') && !currentUser) renderUserSelect(); 
-                    const adminList = document.getElementById('admin-user-list'); if(adminList && adminList.innerHTML !== '') renderAdminUsers();
-                }
+            // 1. 同步帳號密碼名單
+            const userDoc = await fsDb.collection('workspaces').doc(`${currentWorkspace}_users`).get();
+            if(userDoc.exists && userDoc.data().data) {
+                const newUsersData = JSON.parse(userDoc.data().data);
+                customUsers = { ...baseAuthRules, ...customUsers, ...newUsersData };
+                authRules = { ...customUsers }; allMembers = Object.keys(authRules);
+                localStorage.setItem(`app_users_${currentWorkspace}`, JSON.stringify(customUsers));
+                if (document.getElementById('user-select') && !currentUser) renderUserSelect();
+                const adminList = document.getElementById('admin-user-list'); if(adminList && adminList.innerHTML !== '') renderAdminUsers();
             }
 
-            // 2. 同步所有專案
-            const snapshot = await fsDb.collection('workspaces').doc(currentWorkspace).collection('projects').get();
-            let newData = [];
-            snapshot.forEach(doc => newData.push(doc.data()));
-
-            if(newData.length > 0) {
-                let newDataString = JSON.stringify(newData);
-                const currentDB = getDB(); 
-                const shouldForceOverride = currentDB.length === 0 || newData.length > currentDB.length;
+            // 2. 同步行程資料
+            const tripDoc = await fsDb.collection('workspaces').doc(currentWorkspace).get();
+            if(tripDoc.exists && tripDoc.data().data) {
+                let newDataString = tripDoc.data().data;
+                // 修正可能出現的簡體字問題
+                if (newDataString.includes('魏敏轩')) newDataString = newDataString.replace(/魏敏轩/g, '魏敏軒');
+                const oldDataString = localStorage.getItem(`app_${currentWorkspace}`); 
                 
-                if (shouldForceOverride || Date.now() - lastSaveTime >= 10000) { 
-                    const oldDataString = localStorage.getItem(`app_${currentWorkspace}`); 
-                    if (oldDataString !== newDataString || shouldForceOverride) {
-                        localStorage.setItem(`app_${currentWorkspace}`, newDataString); getDB(); 
-                        if(currentProjectId && !isBackground) { 
-                            const p = getCurProject(); 
-                            if(!p || !p.id) goBackToDashboard(); 
-                            else { safeRenderAll(); updateOnlineUsers(); const mapTab = document.getElementById('tab-map'); if (mapTab && mapTab.classList.contains('active')) renderMapRoute(); } 
-                        } 
-                        else if (currentProjectId && isBackground) { safeRenderAll(); updateOnlineUsers(); } 
-                        renderDashboard();
-                    }
+                if (oldDataString !== newDataString) {
+                    localStorage.setItem(`app_${currentWorkspace}`, newDataString); getDB(); 
+                    if(currentProjectId && !isBackground) { 
+                        safeRenderAll(); updateOnlineUsers(); 
+                        if (document.getElementById('tab-map') && document.getElementById('tab-map').classList.contains('active')) renderMapRoute(); 
+                    } 
+                    renderDashboard();
                 }
             }
             if(showMsg && !isBackground) showSync("✅ 同步完成", 1000);
         } catch(e) {
-            console.error("Firebase sync error:", e);
+            console.error(e);
             if(showMsg && !isBackground) showSync("⚠️ 同步失敗，請檢查網路", 1500);
         }
     }
 
+    function startAutoSync() { if(syncInterval) clearInterval(syncInterval); syncInterval = setInterval(() => { if(document.visibilityState === 'visible') syncFromCloud(false, true); }, 15000); }
+
+    // 💾 儲存行程資料到 Firebase
     function saveDB(data) { 
-        lastSaveTime = Date.now(); 
         const pIdx = data.findIndex(p => p.id === currentProjectId);
-        if(pIdx > -1) { 
-            if(!data[pIdx].activeUsers) data[pIdx].activeUsers = {}; 
-            const currentTab = localStorage.getItem('app_lastTab') || 'itinerary';
-            data[pIdx].activeUsers[currentUser] = { time: Date.now(), tab: currentTab }; 
-        }
-        // 寫入本地快取
-        localStorage.setItem(`app_${currentWorkspace}`, JSON.stringify(data)); 
+        if(pIdx > -1) { if(!data[pIdx].activeUsers) data[pIdx].activeUsers = {}; data[pIdx].activeUsers[currentUser] = Date.now(); }
         
-        // 寫入 Firebase
-        isSaving = true;
-        if (currentProjectId && pIdx > -1) {
-            fsDb.collection('workspaces').doc(currentWorkspace).collection('projects').doc(String(currentProjectId)).set(data[pIdx])
-                .then(() => { isSaving = false; })
-                .catch(e => { console.error(e); isSaving = false; });
-        } else {
-            // 批次寫入 (適用於無指定 currentProjectId 的情況)
-            const batch = fsDb.batch();
-            data.forEach(p => {
-                const docRef = fsDb.collection('workspaces').doc(currentWorkspace).collection('projects').doc(String(p.id));
-                batch.set(docRef, p);
-            });
-            batch.commit().then(() => { isSaving = false; }).catch(e => { console.error(e); isSaving = false; });
-        }
+        const dataString = JSON.stringify(data);
+        localStorage.setItem(`app_${currentWorkspace}`, dataString); 
+        fsDb.collection('workspaces').doc(currentWorkspace).set({ data: dataString }, { merge: true }).catch(e => console.error(e));
     }
-
+    
+    // 💾 儲存帳號名單到 Firebase
     function saveUsersDB() { 
-        localStorage.setItem(`app_users_${currentWorkspace}`, JSON.stringify(customUsers)); 
-        fsDb.collection('workspaces').doc(currentWorkspace).collection('settings').doc('users').set(customUsers).catch(e => console.error(e));
+        const dataString = JSON.stringify(customUsers);
+        localStorage.setItem(`app_users_${currentWorkspace}`, dataString); 
+        fsDb.collection('workspaces').doc(`${currentWorkspace}_users`).set({ data: dataString }, { merge: true }).catch(e => console.error(e));
     }
-
-    // 啟動自動同步
-    function startAutoSync() { if(syncInterval) clearInterval(syncInterval); syncInterval = setInterval(() => { if(document.visibilityState === 'visible' && currentUser) { syncFromCloud(false, true); } }, 5000); }
 
     function syncGlobalUsers(db) {
         let updated = false;
@@ -1404,16 +1375,16 @@
     }
     function adminDelUser(name) { showCustomDialog(`⚠️ 確定要刪除 ${name} 嗎？這將無法復原！`, true, () => { withLoader(() => { delete customUsers[name]; localStorage.setItem(`app_users_${currentWorkspace}`, JSON.stringify(customUsers)); authRules = { ...customUsers }; allMembers = Object.keys(authRules); saveUsersDB(); renderUserSelect(); renderAdminUsers(); showSync("✅ 帳號已刪除", 1500); }); }); }
 
-    // --- 初始化 ---
+  // --- 初始化 ---
     window.onload = () => { 
         updateLiveRates();
         try { if (typeof flatpickr !== 'undefined') flatpickr("#trip-date-range", { mode: "range", minDate: "today", locale: "zh_tw" }); const expDateEl = document.getElementById('exp-date'); if (expDateEl) expDateEl.valueAsDate = new Date(); } catch(e) {}
         renderUserSelect(); bindEnterEvents(); enableDragToScroll(); 
         
         // 初次載入從 Firebase 獲取 Users
-        fsDb.collection('workspaces').doc(currentWorkspace).collection('settings').doc('users').get().then(doc => {
-            if (doc.exists) { 
-                const newUsersData = doc.data();
+        fsDb.collection('workspaces').doc(`${currentWorkspace}_users`).get().then(doc => {
+            if (doc.exists && doc.data().data) { 
+                const newUsersData = JSON.parse(doc.data().data);
                 customUsers = { ...baseAuthRules, ...customUsers, ...newUsersData }; authRules = { ...customUsers }; allMembers = Object.keys(authRules); localStorage.setItem(`app_users_${currentWorkspace}`, JSON.stringify(customUsers)); if (!currentUser) renderUserSelect(); 
             }
         }).catch(() => {});
