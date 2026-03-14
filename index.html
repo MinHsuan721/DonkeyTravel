@@ -8,7 +8,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="粗趣丸">
-  <!-- 改為相對路徑，確保移植 GitHub 後圖片不破圖，請確保同目錄下有 logo1.png -->
   <link rel="apple-touch-icon" href="./logo1.png">
   
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -21,26 +20,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
-  <!-- 引入 Firebase Web SDK (相容模式以符合既有寫法) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
   <style>
-    /* 乾淨高質感配色 */
-    :root {
-      --primary: #FF5A5F; 
-      --primary-hover: #E35156; 
-      --secondary: #00A699; 
-      --danger: #FF3B30; 
-      --bg-color: #F4F7FC; 
-      --surface: #ffffff; 
-      --text-main: #1A1A1A; 
-      --text-muted: #666666; 
-      --border: #E4E8ED; 
-      --shadow: rgba(0, 0, 0, 0.06) 0px 8px 24px; 
-      --radius: 20px;
-      --nav-height: 65px;
-    }
+    :root { --primary: #FF5A5F; --primary-hover: #E35156; --secondary: #00A699; --danger: #FF3B30; --bg-color: #F4F7FC; --surface: #ffffff; --text-main: #1A1A1A; --text-muted: #666666; --border: #E4E8ED; --shadow: rgba(0, 0, 0, 0.06) 0px 8px 24px; --radius: 20px; --nav-height: 65px; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; padding-bottom: calc(var(--nav-height) + 20px); overflow-x: hidden; }
     [onclick], button, select, .checkbox-item, .transit-block, .project-card, .create-project-card { cursor: pointer; transition: all 0.2s ease; }
@@ -49,37 +33,30 @@
     .view.active { display: block; animation: fadeIn 0.3s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* 按鈕與表單 */
     .btn { padding: 14px 24px; background: var(--primary); color: white; border: none; border-radius: 16px; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 4px 10px rgba(255, 90, 95, 0.2);}
     .btn:hover { filter: brightness(0.95); transform: translateY(-1px); box-shadow: 0 6px 14px rgba(255, 90, 95, 0.3);}
     .btn:active:not(:disabled) { transform: scale(0.96); box-shadow: 0 2px 6px rgba(255, 90, 95, 0.2);}
     .btn:disabled { opacity: 0.7; cursor: not-allowed; }
-    
     .btn-small { padding: 10px 16px; font-size: 14px; border-radius: 12px; box-shadow: none;}
     .btn-action { background: var(--secondary); color: #ffffff !important; box-shadow: 0 4px 10px rgba(0, 166, 153, 0.2); }
     .btn-action:hover { box-shadow: 0 6px 14px rgba(0, 166, 153, 0.3); }
-    
     .btn-outline { background: var(--surface); border: 1.5px solid var(--border); color: var(--text-main); box-shadow: none; }
     .btn-outline:hover { background: #F8F9FA; border-color: #CBD5E1;}
     .form-control { width: 100%; padding: 16px; border: 1.5px solid var(--border); border-radius: 14px; font-size: 16px; margin-bottom: 12px; background: #FAFBFC; transition: 0.2s; font-weight: 500;}
     .form-control:focus { border-color: var(--primary); outline: none; background: var(--surface); }
     
-    /* 卡片與容器 */
     .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .create-project-card { border: 2px dashed #CBD5E1; background: transparent; padding: 24px; border-radius: 20px; text-align: center; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .create-project-card:hover { border-color: var(--primary); color: var(--primary); background: rgba(255,90,95,0.02); }
-    
     .project-card { position: relative; background: var(--surface); padding: 24px; border-radius: 24px; box-shadow: var(--shadow); margin-bottom: 16px; border: 1px solid rgba(0,0,0,0.02); overflow: hidden;}
     .project-card:hover { border-color: var(--primary); transform: translateY(-2px); }
     
-    /* 狀態標籤 */
     .status-badge { position: absolute; top: 16px; left: 16px; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; z-index: 5; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     .status-badge.upcoming { background: #FFFDE7; color: #F59E0B; border: 1px solid #FDE047; }
     .status-badge.ongoing { background: #FEF2F2; color: var(--danger); border: 1px solid #FECACA; animation: pulseRed 2s infinite; }
     .status-badge.past { background: #F1F5F9; color: var(--text-muted); border: 1px solid #E2E8F0; }
     .status-badge.archived-badge { background: #E2E8F0; color: #475569; border: 1px solid #CBD5E1; }
 
-    /* 刪除與編輯專案按鈕 */
     .del-btn-card { position: absolute; top: 16px; right: 16px; background: var(--danger); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 2px 8px rgba(255,59,48,0.3); transition: 0.2s; }
     .del-btn-card:hover { transform: scale(1.15); background: #E53935; }
     .edit-btn-card { position: absolute; top: 16px; right: 56px; background: #F1F5F9; color: var(--text-main); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; z-index: 10; transition: 0.2s; }
@@ -97,7 +74,6 @@
     .online-dot { width: 8px; height: 8px; background: var(--secondary); border-radius: 50%; animation: pulse 2s infinite; }
     @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 166, 153, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 166, 153, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 166, 153, 0); } }
 
-    /* 底部導航 */
     .bottom-nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; height: calc(var(--nav-height) + env(safe-area-inset-bottom)); background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); border-top: 1px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
     .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 20%; color: var(--text-muted); transition: 0.2s; position: relative; height: 100%; }
     .nav-item:hover { color: var(--primary); }
@@ -111,7 +87,6 @@
     .notification-dot { display: none; position: absolute; top: -4px; right: -10px; min-width: 18px; height: 18px; padding: 0 4px; background: var(--danger); color: white; border-radius: 10px; font-size: 10px; font-weight: bold; align-items: center; justify-content: center; border: 2px solid white; animation: pulseRed 2s infinite; z-index: 10;}
     @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
 
-    /* 天數選擇器 */
     .day-selector-container { position: sticky; top: 0; margin: 0 -20px 20px -20px; background: var(--bg-color); z-index: 100; padding-top: 10px;}
     .day-selector { padding: 0 20px 10px 20px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; cursor: grab; border-bottom: 1px solid var(--border); }
     .day-selector::-webkit-scrollbar { display: none; }
@@ -129,7 +104,6 @@
     .duty-roster-bar { background: #FFFDE7; border: 1px solid #FDE047; padding: 10px 14px; border-radius: 14px; display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 13px; font-weight: 800; color: #B45309; }
     .duty-roster-select { border: none; background: transparent; font-weight: 800; color: var(--primary); outline: none; margin-left: 4px; border-bottom: 1px dashed var(--primary); cursor: pointer; }
     
-    /* 日期標題區與時間軸 */
     .itinerary-date-header { font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;}
     .timeline-container { padding-top: 10px; }
     .plan-row { display: flex; position: relative; }
@@ -146,7 +120,6 @@
     .drag-handle:active { cursor: grabbing; color: var(--primary); }
     .plan-number-badge { position: absolute; top: -8px; left: 24px; background: var(--primary); color: white; width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(255, 90, 95, 0.3); z-index: 5;}
     
-    /* 交通方式選擇區塊 */
     .transit-container { position: relative; margin-top: -8px; margin-bottom: 12px; margin-left: 64px; padding-left: 12px; border-left: 2px dashed #E4E8ED; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;}
     .transit-block { padding: 4px 10px; background: #ffffff; border: 2px solid var(--secondary); border-radius: 16px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; color: var(--secondary); box-shadow: 0 2px 6px rgba(0, 166, 153, 0.15); z-index: 20; cursor: pointer; transition: 0.2s;}
     .transit-block:hover { background: var(--secondary); color: #ffffff; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0, 166, 153, 0.3); }
@@ -154,14 +127,12 @@
     .gmaps-link-btn { background: #4285F4; color: #ffffff !important; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 800; text-decoration: none; border: none; display: inline-flex; align-items: center; box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3); z-index: 20; transition: 0.2s;}
     .gmaps-link-btn:hover { background: #3367D6; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4); }
 
-    /* 標籤與文字 */
     .creator-badge { font-size: 11px; background: #F1F5F9; color: var(--text-muted); padding: 4px 10px; border-radius: 12px; display: inline-block; font-weight: 600; margin:0; }
     .action-text { cursor: pointer; font-size: 13px; font-weight: 700; padding: 6px 10px; border-radius: 8px; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; background: #F8F9FA;}
     .action-text:hover { filter: brightness(0.95); background: #E2E8F0; }
     .edit-text { color: var(--secondary); margin-right: 6px; }
     .del-text { color: var(--danger); background: #FFF0F0;}
     
-    /* 地圖與自訂地標 (懸浮定位) */
     .map-search-bar { display: flex; gap: 8px; margin-bottom: 12px; position: relative;}
     .map-search-bar .form-control { margin-bottom: 0; }
     .search-results-container { position: absolute; top: 60px; left: 0; right: 0; background: white; border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 500; display: none; max-height: 250px; overflow-y: auto; border: 1px solid var(--border); }
@@ -185,7 +156,6 @@
     .file-upload-label { display: flex; align-items: center; justify-content: center; padding: 14px; background: #f8f9fa; border: 1.5px dashed #CBD5E1; border-radius: 14px; color: var(--text-muted); font-weight: 600; cursor: pointer; margin-bottom: 12px; transition: 0.2s; }
     .file-upload-label:hover { background: #F1F5F9; border-color: var(--secondary); color: var(--secondary); }
     
-    /* 底部懸浮面板 */
     .bottom-sheet { position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background: var(--surface); border-radius: 24px 24px 0 0; padding: 24px 24px 40px 24px; box-shadow: 0 -10px 30px rgba(0,0,0,0.15); z-index: 2000; transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
     .bottom-sheet.active { bottom: 0; }
     .sheet-handle { width: 40px; height: 5px; background: #E4E8ED; border-radius: 10px; margin: 0 auto 16px auto; }
@@ -193,7 +163,6 @@
     .sheet-input-title:focus { border-color: var(--primary); border-style: solid; outline:none; background: #FFF9F9; }
     .sheet-input-desc { font-size:14px; font-weight:500; color:var(--text-muted); border:none; border-bottom: 1px dashed #CBD5E1; width:100%; margin-bottom:16px; padding:4px 0; background:transparent; transition:0.2s; }
 
-    /* iOS 風格切換開關 */
     .toggle-switch { position: relative; width: 46px; height: 26px; background: #CBD5E1; border-radius: 13px; transition: 0.3s; cursor: pointer; }
     .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; background: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     input:checked + .toggle-switch { background: var(--secondary); }
@@ -204,7 +173,6 @@
     .poll-opt-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
     .poll-opt-input { background: #FAFBFC; font-size: 15px; border-radius: 12px;}
     
-    /* 工具列導航美化 - 確保不跑版 */
     .sub-nav-container { display: flex; background: #F1F5F9; border-radius: 16px; padding: 4px; margin-bottom: 20px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;}
     .sub-nav-container::-webkit-scrollbar { display: none; }
     .sub-nav-btn { flex: 1; text-align: center; padding: 10px 16px; font-size: 14px; font-weight: 800; color: var(--text-muted); border-radius: 12px; cursor: pointer; transition: 0.3s; position: relative; display: inline-block;}
@@ -214,7 +182,6 @@
     .tool-btn { flex: 1; background: #F1F5F9; color: var(--text-main); border: none; padding: 12px; border-radius: 16px; font-weight: 800; font-size: 14px; text-decoration: none; text-align: center; display: inline-block; cursor: pointer; transition: 0.2s; box-shadow: none;}
     .tool-btn.call { background: #E8F4FD; color: #0284C7; }
 
-    /* 行李清單 */
     .more-section { display: none; }
     .checklist-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); cursor:pointer;}
     .check-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #CBD5E1; display: flex; align-items: center; justify-content: center; transition: 0.2s; color: white; font-size: 12px;}
@@ -336,7 +303,6 @@
             <div class="nav-item" onclick="switchTab('more')"><div class="nav-icon">⚙️<span id="more-poll-dot" class="notification-dot"></span></div><div class="nav-text">更多</div></div>
         </div>
 
-        <!-- 📅 行程頁籤 -->
         <div id="tab-itinerary" class="module-content active">
           <div class="day-selector-container hide-in-export" id="day-container"><div class="day-selector" id="day-buttons"></div></div>
           
@@ -382,7 +348,6 @@
           </div>
         </div>
 
-        <!-- 🗺️ 地圖頁籤 -->
         <div id="tab-map" class="module-content hide-in-export">
           <div style="display:flex; gap:8px; margin-bottom: 12px;" class="hide-in-archive">
               <input type="text" id="map-url-input" class="form-control" style="margin-bottom:0; flex:1; border-color:var(--secondary);" placeholder="🔗 貼上 Google Maps 網址自動解析">
@@ -411,7 +376,6 @@
           </div>
         </div>
 
-        <!-- 💰 分帳頁籤 -->
         <div id="tab-budget" class="module-content hide-in-export">
           <div class="card-panel" style="background: linear-gradient(135deg, var(--primary), #FF7E82); color: white; border: none; display: flex; justify-content: space-between; align-items: center;">
             <div>
@@ -487,7 +451,6 @@
           </div>
         </div>
 
-        <!-- 📝 記事頁籤 -->
         <div id="tab-notes" class="module-content hide-in-export">
           <div id="note-form-card" class="card-panel hide-in-archive">
             <h4 id="note-form-title" style="margin-bottom: 12px; font-size:16px;">新增記事</h4>
@@ -501,7 +464,6 @@
           <div id="notes-list"></div>
         </div>
 
-        <!-- ⚙️ 更多頁籤 -->
         <div id="tab-more" class="module-content hide-in-export">
             <div class="sub-nav-container">
                 <div class="sub-nav-btn active" id="btn-more-contact" onclick="switchMoreTab('more-contact')">📞 聯絡人</div>
@@ -511,7 +473,6 @@
                 <div class="sub-nav-btn" id="btn-more-linebot" onclick="switchMoreTab('more-linebot')">🤖 機器人</div>
             </div>
 
-            <!-- 聯絡人 -->
             <div id="more-contact" class="more-section" style="display:block;">
               <div id="contact-form-card" class="card-panel hide-in-archive">
                 <h4 id="contact-form-title" style="margin-bottom: 16px; font-size:16px;">新增聯絡人</h4>
@@ -526,7 +487,6 @@
               <div id="contacts-list"></div>
             </div>
 
-            <!-- 投票 -->
             <div id="more-poll" class="more-section" style="display:none;">
               <button class="btn btn-action hide-in-archive" id="show-poll-btn" style="width:100%; margin-bottom:16px; padding:16px; border-radius:16px; color:white !important;" onclick="document.getElementById('poll-form-card').style.display='block'; this.style.display='none';"><span style="font-size:18px; line-height:1; margin-right:4px;">+</span> 建立新投票</button>
               
@@ -553,7 +513,6 @@
               <div id="polls-list"></div>
             </div>
 
-            <!-- 行李清單 -->
             <div id="more-checklist" class="more-section" style="display:none;">
                 <div class="card-panel hide-in-archive" style="padding:16px;">
                     <div style="display:flex; gap:8px;">
@@ -572,7 +531,6 @@
                 </div>
             </div>
 
-            <!-- eSIM 網卡模組 -->
             <div id="more-esim" class="more-section" style="display:none;">
                 <div class="card-panel hide-in-archive">
                     <h4 style="margin-bottom: 12px; font-size:16px;">分享 eSIM 資訊</h4>
@@ -590,7 +548,6 @@
                 <div id="esim-list"></div>
             </div>
 
-            <!-- LINE 機器人模組 -->
             <div id="more-linebot" class="more-section" style="display:none;">
                 <div class="card-panel hide-in-archive">
                     <h4 style="margin-bottom: 12px; font-size:16px; color:#00B900; display:flex; align-items:center; gap:6px;">
@@ -641,8 +598,6 @@
       </div>
   </div> 
 
-  <!-- 💡 Modal 彈跳視窗集合 -->
-  
   <div id="custom-dialog-overlay" class="modal-overlay" onclick="closeModal('custom-dialog-overlay')">
     <div class="modal" onclick="event.stopPropagation()">
         <div id="custom-dialog-icon" style="font-size: 40px; margin-bottom: 12px;">💡</div>
@@ -1239,19 +1194,6 @@
         fsDb.collection('workspaces').doc(`${currentWorkspace}_users`).set({ data: dataString }, { merge: true }).catch(e => console.error(e));
     }
 
-    function syncGlobalUsers(db) {
-        let updated = false;
-        db.forEach(p => {
-            if(!p.members) p.members = [];
-            if(p.expenses) p.expenses.forEach(e => { if(e.payer && !p.members.includes(e.payer)) { p.members.push(e.payer); updated = true; } });
-            let potentialUsers = [...p.members];
-            if(p.expenses) p.expenses.forEach(e => { if(e.excludes) potentialUsers.push(...e.excludes); });
-            potentialUsers.forEach(u => { if (u && !customUsers[u]) { customUsers[u] = '1234'; updated = true; } });
-        });
-        if (updated) { localStorage.setItem(`app_users_${currentWorkspace}`, JSON.stringify(customUsers)); authRules = { ...customUsers }; allMembers = Object.keys(authRules); if (document.getElementById('user-select') && !currentUser) renderUserSelect(); saveUsersDB(); }
-        return updated;
-    }
-
     function getDB() { 
         let raw = localStorage.getItem(`app_${currentWorkspace}`) || '[]'; let db = []; 
         try { db = JSON.parse(raw); if (!Array.isArray(db)) db = []; } catch(e) { db = []; }
@@ -1261,7 +1203,6 @@
                 p.members = allMembers.length > 0 ? [...allMembers] : [];
                 updated = true;
             }
-        });
             if(!p.status) { p.status = 'active'; updated = true; } if(!p.wishlist) { p.wishlist = []; updated = true; } if(!p.duties) { p.duties = {}; updated = true; } if(!p.repayments) { p.repayments = []; updated = true; }
             if(!p.exchangeRates || typeof p.exchangeRates !== 'object' || p.exchangeRates.currency) { p.exchangeRates = { ...defaultExchangeRates }; updated = true; }
             if(!p.activeCurrencies || !Array.isArray(p.activeCurrencies)) { p.activeCurrencies = ['JPY']; updated = true; }
@@ -1270,12 +1211,12 @@
             if(!p.esims) { p.esims = []; updated = true; }
             p.expenses.forEach(e => { if(!e.category) { e.category = '其他'; updated = true; } });
         });
-        if (syncGlobalUsers(db)) updated = true; if(updated) localStorage.setItem(`app_${currentWorkspace}`, JSON.stringify(db)); return db; 
+        if(updated) localStorage.setItem(`app_${currentWorkspace}`, JSON.stringify(db)); return db; 
     }
 
     function getCurProject() { return getDB().find(p => p.id === currentProjectId) || null; }
     function updateCurProject(updatedP) { const db = getDB(); const idx = db.findIndex(p => p.id === currentProjectId); if (idx > -1) { db[idx] = updatedP; saveDB(db); updateOnlineUsers(); } }
-    function getTripMembers() { const p = getCurProject(); return p?.members || ['魏嘉宏', '魏卉姍', '魏敏軒', '魏珮芯', '陳筱雙']; }
+    function getTripMembers() { const p = getCurProject(); return p?.members || []; }
 
     // --- 管理員與個人資料修改 ---
     function openAdminLogin() { openModal('admin-login-modal'); const el = document.getElementById('admin-pwd-input'); if(el) el.value = ''; }
@@ -1452,7 +1393,11 @@
     function handleLogout() { showCustomDialog("確定要登出嗎？", true, () => { withLoader(() => { currentUser = null; currentProjectId = null; localStorage.removeItem('app_savedUser'); localStorage.removeItem('app_lastProj'); if(syncInterval) clearInterval(syncInterval); switchView('login-view'); const pwdInput = document.getElementById('password-input'); if(pwdInput) pwdInput.value = ''; }, 400); }); }
     function openModal(id) { const el = document.getElementById(id); if (el) el.classList.add('active'); }
     function closeModal(id) { const el = document.getElementById(id); if (el) el.classList.remove('active'); }
-    function saveNewUser() { const name = document.getElementById('new-user-name').value.trim(); const pwd = document.getElementById('new-user-pwd').value.trim(); if(!name || !pwd) return alert("請輸入完整名稱與密碼"); if(authRules[name]) return alert("此名稱已存在"); customUsers[name] = pwd; saveUsersDB(); authRules = { ...customUsers }; allMembers = Object.keys(authRules); renderUserSelect(); closeModal('add-user-modal'); document.getElementById('user-select').value = name; document.getElementById('password-input').value = pwd; }
+    function saveNewUser() { 
+        const nameInput = document.getElementById('new-user-name'); const name = nameInput ? nameInput.value.trim() : ''; const pwdInput = document.getElementById('new-user-pwd'); const pwd = pwdInput ? pwdInput.value.trim() : ''; 
+        if(!name || !pwd) return showCustomDialog("請輸入完整名稱與密碼"); if(authRules[name]) return showCustomDialog("此名稱已存在"); 
+        customUsers[name] = pwd; saveUsersDB(); authRules = { ...customUsers }; allMembers = Object.keys(authRules); renderUserSelect(); closeModal('add-user-modal'); const userSel = document.getElementById('user-select'); if(userSel) userSel.value = name; const passInput = document.getElementById('password-input'); if(passInput) passInput.value = pwd; 
+    }
     
     function closeManageMembers() { withLoader(() => { safeRenderAll(); closeModal('manage-members-modal'); }); }
     function closeSplitExclusion() { withLoader(() => { renderBudget(); closeModal('split-exclusion-modal'); }); }
@@ -2318,561 +2263,561 @@
 
         const normalActionEl = document.getElementById('sheet-normal-action'); const editActionEl = document.getElementById('sheet-edit-action');
         if(isEditingLocation) { if(normalActionEl) normalActionEl.style.display = 'none'; if(editActionEl) editActionEl.style.display = 'block'; } else { if(normalActionEl) normalActionEl.style.display = 'block'; if(editActionEl) editActionEl.style.display = 'none'; }
-        
-        const overlayEl = document.getElementById('sheet-overlay'); if(overlayEl) overlayEl.style.display = 'block'; 
-        setTimeout(() => { const bottomSheetEl = document.getElementById('map-bottom-sheet'); if(bottomSheetEl) bottomSheetEl.classList.add('active'); }, 10);
-    }
-    
-    function closeBottomSheet() { const bottomSheetEl = document.getElementById('map-bottom-sheet'); if(bottomSheetEl) bottomSheetEl.classList.remove('active'); setTimeout(() => { const overlayEl = document.getElementById('sheet-overlay'); if(overlayEl) overlayEl.style.display = 'none'; }, 300); currentSheetSelection = null; }
+        
+        const overlayEl = document.getElementById('sheet-overlay'); if(overlayEl) overlayEl.style.display = 'block'; 
+        setTimeout(() => { const bottomSheetEl = document.getElementById('map-bottom-sheet'); if(bottomSheetEl) bottomSheetEl.classList.add('active'); }, 10);
+    }
+    
+    function closeBottomSheet() { const bottomSheetEl = document.getElementById('map-bottom-sheet'); if(bottomSheetEl) bottomSheetEl.classList.remove('active'); setTimeout(() => { const overlayEl = document.getElementById('sheet-overlay'); if(overlayEl) overlayEl.style.display = 'none'; }, 300); currentSheetSelection = null; }
 
-    function addFromSheet() { 
-        if(!currentSheetSelection) return; const nameInput = document.getElementById('sheet-place-name-input'); const finalName = nameInput ? nameInput.value : currentSheetSelection.name;
-        const dayInput = document.getElementById('sheet-popup-day'); const day = dayInput ? parseInt(dayInput.value) : activeDayIndex; 
-        const timeInput = document.getElementById('sheet-popup-time'); const time = timeInput ? timeInput.value : '12:00'; 
-        showAddPlanForm(); const success = addOrUpdatePlan(finalName, currentSheetSelection.lat, currentSheetSelection.lng, day, time); 
-        if (success !== false) { closeBottomSheet(); switchTab('itinerary'); }
-    }
-    
-    function updateLocationToForm() { 
-        if(!currentSheetSelection) return; const nameInput = document.getElementById('sheet-place-name-input'); const finalName = nameInput ? nameInput.value : currentSheetSelection.name;
-        const planPlaceInput = document.getElementById('plan-place'); if(planPlaceInput) planPlaceInput.value = finalName; 
-        const editLatInput = document.getElementById('edit-lat'); if(editLatInput) editLatInput.value = currentSheetSelection.lat; 
-        const editLngInput = document.getElementById('edit-lng'); if(editLngInput) editLngInput.value = currentSheetSelection.lng; 
-        closeBottomSheet(); isEditingLocation = false; switchTab('itinerary'); showSync("📍 地標已帶入，請確認後點擊儲存", 2500); 
-    }
+    function addFromSheet() { 
+        if(!currentSheetSelection) return; const nameInput = document.getElementById('sheet-place-name-input'); const finalName = nameInput ? nameInput.value : currentSheetSelection.name;
+        const dayInput = document.getElementById('sheet-popup-day'); const day = dayInput ? parseInt(dayInput.value) : activeDayIndex; 
+        const timeInput = document.getElementById('sheet-popup-time'); const time = timeInput ? timeInput.value : '12:00'; 
+        showAddPlanForm(); const success = addOrUpdatePlan(finalName, currentSheetSelection.lat, currentSheetSelection.lng, day, time); 
+        if (success !== false) { closeBottomSheet(); switchTab('itinerary'); }
+    }
+    
+    function updateLocationToForm() { 
+        if(!currentSheetSelection) return; const nameInput = document.getElementById('sheet-place-name-input'); const finalName = nameInput ? nameInput.value : currentSheetSelection.name;
+        const planPlaceInput = document.getElementById('plan-place'); if(planPlaceInput) planPlaceInput.value = finalName; 
+        const editLatInput = document.getElementById('edit-lat'); if(editLatInput) editLatInput.value = currentSheetSelection.lat; 
+        const editLngInput = document.getElementById('edit-lng'); if(editLngInput) editLngInput.value = currentSheetSelection.lng; 
+        closeBottomSheet(); isEditingLocation = false; switchTab('itinerary'); showSync("📍 地標已帶入，請確認後點擊儲存", 2500); 
+    }
 
-    function renderMapRoute() {
-      if(!map) return; mapMarkers.forEach(m => map.removeLayer(m)); mapMarkers = []; if(routeLine) map.removeLayer(routeLine); if(activeClickMarker) map.removeLayer(activeClickMarker);
-      const p = getCurProject(); 
-      const targetPlans = (p.plans || []).filter(plan => plan && plan.dayIdx === activeDayIndex && plan.lat && plan.lng).sort((a,b)=>(a.time || '').localeCompare(b.time || ''));
+    function renderMapRoute() {
+      if(!map) return; mapMarkers.forEach(m => map.removeLayer(m)); mapMarkers = []; if(routeLine) map.removeLayer(routeLine); if(activeClickMarker) map.removeLayer(activeClickMarker);
+      const p = getCurProject(); 
+      const targetPlans = (p.plans || []).filter(plan => plan && plan.dayIdx === activeDayIndex && plan.lat && plan.lng).sort((a,b)=>(a.time || '').localeCompare(b.time || ''));
 
-      if(targetPlans.length === 0) return;
-      const latlngs = [];
-      targetPlans.forEach((plan, index) => {
-        const pt = [plan.lat, plan.lng]; latlngs.push(pt); 
-        const marker = L.marker(pt, {icon: createCustomMapIcon(index + 1, '')}).addTo(map);
-        marker.bindTooltip(`<div class="day-tooltip-title">第 ${plan.dayIdx + 1} 天</div><div class="day-tooltip-place">${plan.place}</div>`, {permanent: true, direction: "top", offset: [0, -35], className: "day-tooltip"});
-        marker.on('click', () => { if(activeDayIndex !== plan.dayIdx) { changeDayIndex(plan.dayIdx); } switchTab('itinerary'); });
-        mapMarkers.push(marker);
-      });
-      if(latlngs.length > 1) routeLine = L.polyline(latlngs, {color: 'var(--secondary)', weight: 4, opacity: 0.8, dashArray: '8, 8'}).addTo(map);
-      map.fitBounds(L.latLngBounds(latlngs), { padding: [40, 40] });
-    }
+      if(targetPlans.length === 0) return;
+      const latlngs = [];
+      targetPlans.forEach((plan, index) => {
+        const pt = [plan.lat, plan.lng]; latlngs.push(pt); 
+        const marker = L.marker(pt, {icon: createCustomMapIcon(index + 1, '')}).addTo(map);
+        marker.bindTooltip(`<div class="day-tooltip-title">第 ${plan.dayIdx + 1} 天</div><div class="day-tooltip-place">${plan.place}</div>`, {permanent: true, direction: "top", offset: [0, -35], className: "day-tooltip"});
+        marker.on('click', () => { if(activeDayIndex !== plan.dayIdx) { changeDayIndex(plan.dayIdx); } switchTab('itinerary'); });
+        mapMarkers.push(marker);
+      });
+      if(latlngs.length > 1) routeLine = L.polyline(latlngs, {color: 'var(--secondary)', weight: 4, opacity: 0.8, dashArray: '8, 8'}).addTo(map);
+      map.fitBounds(L.latLngBounds(latlngs), { padding: [40, 40] });
+    }
 
-    function openExchangeRateModal() {
-        const p = getCurProject(); let activeCurrs = Array.isArray(p.activeCurrencies) ? p.activeCurrencies : ['JPY']; let html = '';
-        for (const [code, info] of Object.entries(CURRENCY_MAP)) {
-            const isChecked = activeCurrs.includes(code) ? 'checked' : ''; const rateText = liveRates[code] ? `1 ${code} ≈ ${liveRates[code].toFixed(4)} 台幣` : '匯率載入中...';
-            html += `<label class="checkbox-item currency-item-row" data-name="${info.name} ${code}" style="padding:12px; background:white; margin-bottom:8px; border-radius:12px; border:1px solid var(--border); cursor:pointer;"><div style="flex:1;"><strong style="font-size:15px; color:var(--text-main);">${info.flag} ${info.name} (${code})</strong><div style="font-size:12px; color:var(--secondary); font-weight:bold; margin-top:4px;">即時匯率: ${rateText}</div></div><input type="checkbox" class="currency-checkbox" value="${code}" style="display:none;" ${isChecked}><div class="toggle-switch"></div></label>`;
-        }
-        const listEl = document.getElementById('currency-selection-list'); if(listEl) listEl.innerHTML = html; 
-        const searchInput = document.getElementById('currency-search-input'); if(searchInput) searchInput.value = '';
-        openModal('exchange-rate-modal');
-    }
-    
-    function filterCurrencies() {
-        const q = document.getElementById('currency-search-input').value.toLowerCase();
-        document.querySelectorAll('.currency-item-row').forEach(row => {
-            const name = row.getAttribute('data-name').toLowerCase();
-            row.style.display = name.includes(q) ? 'flex' : 'none';
-        });
-    }
+    function openExchangeRateModal() {
+        const p = getCurProject(); let activeCurrs = Array.isArray(p.activeCurrencies) ? p.activeCurrencies : ['JPY']; let html = '';
+        for (const [code, info] of Object.entries(CURRENCY_MAP)) {
+            const isChecked = activeCurrs.includes(code) ? 'checked' : ''; const rateText = liveRates[code] ? `1 ${code} ≈ ${liveRates[code].toFixed(4)} 台幣` : '匯率載入中...';
+            html += `<label class="checkbox-item currency-item-row" data-name="${info.name} ${code}" style="padding:12px; background:white; margin-bottom:8px; border-radius:12px; border:1px solid var(--border); cursor:pointer;"><div style="flex:1;"><strong style="font-size:15px; color:var(--text-main);">${info.flag} ${info.name} (${code})</strong><div style="font-size:12px; color:var(--secondary); font-weight:bold; margin-top:4px;">即時匯率: ${rateText}</div></div><input type="checkbox" class="currency-checkbox" value="${code}" style="display:none;" ${isChecked}><div class="toggle-switch"></div></label>`;
+        }
+        const listEl = document.getElementById('currency-selection-list'); if(listEl) listEl.innerHTML = html; 
+        const searchInput = document.getElementById('currency-search-input'); if(searchInput) searchInput.value = '';
+        openModal('exchange-rate-modal');
+    }
+    
+    function filterCurrencies() {
+        const q = document.getElementById('currency-search-input').value.toLowerCase();
+        document.querySelectorAll('.currency-item-row').forEach(row => {
+            const name = row.getAttribute('data-name').toLowerCase();
+            row.style.display = name.includes(q) ? 'flex' : 'none';
+        });
+    }
 
-    function saveExchangeRate() {
-        const checkboxes = document.querySelectorAll('.currency-checkbox'); let selected = []; checkboxes.forEach(cb => { if(cb.checked) selected.push(cb.value); });
-        const p = getCurProject(); p.activeCurrencies = selected; updateCurProject(p);
-        closeModal('exchange-rate-modal'); showSync(`✅ 幣別啟用狀態已更新`, 1500); renderCurrencyDropdown(); updateExpCostCalc(); renderBudget();
-    }
+    function saveExchangeRate() {
+        const checkboxes = document.querySelectorAll('.currency-checkbox'); let selected = []; checkboxes.forEach(cb => { if(cb.checked) selected.push(cb.value); });
+        const p = getCurProject(); p.activeCurrencies = selected; updateCurProject(p);
+        closeModal('exchange-rate-modal'); showSync(`✅ 幣別啟用狀態已更新`, 1500); renderCurrencyDropdown(); updateExpCostCalc(); renderBudget();
+    }
 
-    function renderCurrencyDropdown() {
-        const p = getCurProject(); const sel = document.getElementById('exp-currency'); const editSel = document.getElementById('edit-exp-currency');
-        const activeCurrs = Array.isArray(p.activeCurrencies) ? p.activeCurrencies : ['JPY'];
-        let html = '<option value="TWD">🇹🇼 台幣 (TWD)</option>';
-        activeCurrs.forEach(code => { const info = CURRENCY_MAP[code]; if(info) html += `<option value="${code}">${info.flag} ${info.name} (${code})</option>`; });
-        if (sel) { const currentVal = sel.value; sel.innerHTML = html; if(activeCurrs.includes(currentVal) || currentVal === 'TWD') sel.value = currentVal; else sel.value = 'TWD'; }
-        if (editSel) { const currentEditVal = editSel.value; editSel.innerHTML = html; if(activeCurrs.includes(currentEditVal) || currentEditVal === 'TWD') editSel.value = currentEditVal; else editSel.value = 'TWD'; }
-    }
+    function renderCurrencyDropdown() {
+        const p = getCurProject(); const sel = document.getElementById('exp-currency'); const editSel = document.getElementById('edit-exp-currency');
+        const activeCurrs = Array.isArray(p.activeCurrencies) ? p.activeCurrencies : ['JPY'];
+        let html = '<option value="TWD">🇹🇼 台幣 (TWD)</option>';
+        activeCurrs.forEach(code => { const info = CURRENCY_MAP[code]; if(info) html += `<option value="${code}">${info.flag} ${info.name} (${code})</option>`; });
+        if (sel) { const currentVal = sel.value; sel.innerHTML = html; if(activeCurrs.includes(currentVal) || currentVal === 'TWD') sel.value = currentVal; else sel.value = 'TWD'; }
+        if (editSel) { const currentEditVal = editSel.value; editSel.innerHTML = html; if(activeCurrs.includes(currentEditVal) || currentEditVal === 'TWD') editSel.value = currentEditVal; else editSel.value = 'TWD'; }
+    }
 
-    function updateExpCostCalc() {
-        const sel = document.getElementById('exp-currency'); if(!sel) return; const type = sel.value; const costInput = document.getElementById('exp-cost'); const val = costInput ? parseFloat(costInput.value) || 0 : 0; const hint = document.getElementById('exp-cost-hint');
-        if (hint) { if (type !== 'TWD') { const rate = liveRates[type] || 0.22; hint.style.display = 'block'; hint.textContent = `= 換算台幣 NT$ ${Math.round(val * rate).toLocaleString()}`; } else { hint.style.display = 'none'; } }
-    }
-    
-    function updateEditExpCostCalc() {
-        const sel = document.getElementById('edit-exp-currency'); if(!sel) return; const type = sel.value; const costInput = document.getElementById('edit-exp-cost'); const val = costInput ? parseFloat(costInput.value) || 0 : 0; const hint = document.getElementById('edit-exp-cost-hint');
-        if (hint) { if (type !== 'TWD') { const rate = liveRates[type] || 0.22; hint.style.display = 'block'; hint.textContent = `= 換算台幣 NT$ ${Math.round(val * rate).toLocaleString()}`; } else { hint.style.display = 'none'; } }
-    }
+    function updateExpCostCalc() {
+        const sel = document.getElementById('exp-currency'); if(!sel) return; const type = sel.value; const costInput = document.getElementById('exp-cost'); const val = costInput ? parseFloat(costInput.value) || 0 : 0; const hint = document.getElementById('exp-cost-hint');
+        if (hint) { if (type !== 'TWD') { const rate = liveRates[type] || 0.22; hint.style.display = 'block'; hint.textContent = `= 換算台幣 NT$ ${Math.round(val * rate).toLocaleString()}`; } else { hint.style.display = 'none'; } }
+    }
+    
+    function updateEditExpCostCalc() {
+        const sel = document.getElementById('edit-exp-currency'); if(!sel) return; const type = sel.value; const costInput = document.getElementById('edit-exp-cost'); const val = costInput ? parseFloat(costInput.value) || 0 : 0; const hint = document.getElementById('edit-exp-cost-hint');
+        if (hint) { if (type !== 'TWD') { const rate = liveRates[type] || 0.22; hint.style.display = 'block'; hint.textContent = `= 換算台幣 NT$ ${Math.round(val * rate).toLocaleString()}`; } else { hint.style.display = 'none'; } }
+    }
 
-    function addExpenseFromTop() { 
-        const itemInput = document.getElementById('exp-item'); const item = itemInput ? itemInput.value.trim() : ''; 
-        const categorySel = document.getElementById('exp-category'); const category = categorySel ? categorySel.value : '其他';
-        const currencySel = document.getElementById('exp-currency'); const currency = currencySel ? currencySel.value : 'TWD';
-        const costInput = document.getElementById('exp-cost'); const foreignCost = costInput ? parseFloat(costInput.value) : NaN; 
-        const payerSel = document.getElementById('exp-payer'); const payer = payerSel ? payerSel.value : ''; 
-        const expDateInput = document.getElementById('exp-date'); const expDate = expDateInput ? expDateInput.value : '';
-        
-        if (currency !== 'TWD' && foreignCost > 0) {
-            const rateUsed = liveRates[currency] || 0.22;
-            const twdCost = Math.round(foreignCost * rateUsed);
-            if (twdCost > 50000) {
-                if(!confirm(`您輸入的金額換算為台幣高達 $${twdCost.toLocaleString()}，請問確定沒有選錯幣別嗎？`)) return;
-            }
-        }
-        
-        if(!item || isNaN(foreignCost)) return showCustomDialog("請完整填寫項目與金額！"); 
-        
-        let twdCost = foreignCost; let rateUsed = 1;
-        if (currency !== 'TWD') { rateUsed = liveRates[currency] || 0.22; twdCost = Math.round(foreignCost * rateUsed); }
+    function addExpenseFromTop() { 
+        const itemInput = document.getElementById('exp-item'); const item = itemInput ? itemInput.value.trim() : ''; 
+        const categorySel = document.getElementById('exp-category'); const category = categorySel ? categorySel.value : '其他';
+        const currencySel = document.getElementById('exp-currency'); const currency = currencySel ? currencySel.value : 'TWD';
+        const costInput = document.getElementById('exp-cost'); const foreignCost = costInput ? parseFloat(costInput.value) : NaN; 
+        const payerSel = document.getElementById('exp-payer'); const payer = payerSel ? payerSel.value : ''; 
+        const expDateInput = document.getElementById('exp-date'); const expDate = expDateInput ? expDateInput.value : '';
+        
+        if (currency !== 'TWD' && foreignCost > 0) {
+            const rateUsed = liveRates[currency] || 0.22;
+            const twdCost = Math.round(foreignCost * rateUsed);
+            if (twdCost > 50000) {
+                if(!confirm(`您輸入的金額換算為台幣高達 $${twdCost.toLocaleString()}，請問確定沒有選錯幣別嗎？`)) return;
+            }
+        }
+        
+        if(!item || isNaN(foreignCost)) return showCustomDialog("請完整填寫項目與金額！"); 
+        
+        let twdCost = foreignCost; let rateUsed = 1;
+        if (currency !== 'TWD') { rateUsed = liveRates[currency] || 0.22; twdCost = Math.round(foreignCost * rateUsed); }
 
-        const memberCbs = document.querySelectorAll('.new-exp-member-cb');
-        const excludes = [];
-        memberCbs.forEach(cb => { if (!cb.checked) excludes.push(cb.value); });
+        const memberCbs = document.querySelectorAll('.new-exp-member-cb');
+        const excludes = [];
+        memberCbs.forEach(cb => { if (!cb.checked) excludes.push(cb.value); });
 
-        withLoader(() => {
-            const p = getCurProject(); if(!p.expenses) p.expenses = []; 
-            p.expenses.push({ id: Date.now(), date: expDate, item: item, category: category, cost: twdCost, currency: currency, foreignCost: foreignCost, rate: rateUsed, payer: payer, excludes: excludes }); 
-            updateCurProject(p); renderBudget(); 
-            if(itemInput) itemInput.value = ''; if(costInput) costInput.value = ''; if(currencySel) currencySel.value = 'TWD'; 
-            updateExpCostCalc(); 
-            memberCbs.forEach(cb => cb.checked = true); 
-            showSync("✅ 帳目已建立", 1500); 
+        withLoader(() => {
+            const p = getCurProject(); if(!p.expenses) p.expenses = []; 
+            p.expenses.push({ id: Date.now(), date: expDate, item: item, category: category, cost: twdCost, currency: currency, foreignCost: foreignCost, rate: rateUsed, payer: payer, excludes: excludes }); 
+            updateCurProject(p); renderBudget(); 
+            if(itemInput) itemInput.value = ''; if(costInput) costInput.value = ''; if(currencySel) currencySel.value = 'TWD'; 
+            updateExpCostCalc(); 
+            memberCbs.forEach(cb => cb.checked = true); 
+            showSync("✅ 帳目已建立", 1500); 
 
-            if (twdCost >= 1000) {
-                const tripName = p.location || "旅程";
-                sendAutoLineNotification(`💰【${tripName}】大額記帳通知！\n\n[${payer}] 剛剛記了一筆大額花費：「${item}」(TWD ${twdCost.toLocaleString()})。\n請大家有空去網頁看看分帳明細喔！`);
-            }
-        });
-    }
+            if (twdCost >= 1000) {
+                const tripName = p.location || "旅程";
+                sendAutoLineNotification(`💰【${tripName}】大額記帳通知！\n\n[${payer}] 剛剛記了一筆大額花費：「${item}」(TWD ${twdCost.toLocaleString()})。\n請大家有空去網頁看看分帳明細喔！`);
+            }
+        });
+    }
 
-    function renderBudget() { 
-        const p = getCurProject(); 
-        const list = document.getElementById('expense-list'); 
-        const adviceBox = document.getElementById('split-bill-advice'); 
-        let total = 0; 
+    function renderBudget() { 
+        const p = getCurProject(); 
+        const list = document.getElementById('expense-list'); 
+        const adviceBox = document.getElementById('split-bill-advice'); 
+        let total = 0; 
 
-        renderCurrencyDropdown();
-        
-        const chartContainer = document.getElementById('expense-chart-container');
-        const chartContent = document.getElementById('expense-chart-content');
-        
-        if(!p || !p.expenses || p.expenses.length === 0) { 
-            if(list) list.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><div class="empty-state-icon">💸</div><div class="empty-state-text">目前尚無任何花費紀錄</div></div>`; 
-            if(adviceBox) adviceBox.style.display = 'none'; 
-            if(chartContainer) chartContainer.style.display = 'none';
-            document.getElementById('total-expense').textContent = "0"; document.getElementById('my-total-expense').textContent = "0"; document.getElementById('repayment-section').style.display = 'none'; 
-            return; 
-        } 
-        
-        let catTotals = { '餐飲': 0, '交通': 0, '住宿': 0, '娛樂': 0, '購物': 0, '其他': 0 };
-        const catColors = { '餐飲': '#F59E0B', '交通': '#3B82F6', '住宿': '#8B5CF6', '娛樂': '#EC4899', '購物': '#EF4444', '其他': '#94A3B8' };
-        
-        let html = '';
-        p.expenses.forEach(e => {
-            const costNum = Number(e.cost) || 0; total += costNum;
-            const category = e.category || '其他';
-            if (catTotals[category] !== undefined) catTotals[category] += costNum;
-            
-            const currency = e.currency || 'TWD'; const foreignCost = e.foreignCost || costNum;
-            let excludeText = (e.excludes && e.excludes.length > 0) ? `<div class="expense-sq-exclude">⚠️ ${e.excludes.join(', ')} 不參與</div>` : '';
-            let foreignHtml = '';
-            if (currency && currency !== 'TWD') { const info = CURRENCY_MAP[currency] || { name: '外幣' }; foreignHtml = `<div style="font-size:11px; color:var(--primary); font-weight:bold; margin-top:2px;">${currency} ${foreignCost} <span style="color:var(--text-muted); font-weight:normal;">(${info.name || currency})</span></div>`; }
-            
-            let catBadge = `<span style="font-size:10px; background:${catColors[category]}20; color:${catColors[category]}; padding:2px 6px; border-radius:6px; font-weight:bold; margin-bottom:4px; display:inline-block;">${category}</span>`;
-            
-            html += `
-            <div class="expense-square">
-                <div class="expense-sq-actions hide-in-archive">
-                    <button class="expense-sq-btn" onclick="openInlineExpEdit(${e.id})">✏️</button>
-                    <button class="expense-sq-btn" onclick="delExpense(${e.id})">✕</button>
-                </div>
-                <div><div class="expense-sq-date">${e.date || ''}</div>${catBadge}<div class="expense-sq-item" title="${e.item}">${e.item}</div>${foreignHtml}${excludeText}</div>
-                <div style="margin-top: 12px;"><div class="expense-sq-cost">$${costNum}</div><div class="expense-sq-payer">由 ${e.payer} 代墊</div></div>
-            </div>`;
-        });
-        if(list) list.innerHTML = html; document.getElementById('total-expense').textContent = Math.round(total).toLocaleString(); 
-        
-        if(chartContainer && chartContent && total > 0) {
-            chartContainer.style.display = 'block';
-            let chartHtml = '';
-            Object.keys(catTotals).forEach(cat => {
-                if(catTotals[cat] > 0) {
-                    const percent = Math.round((catTotals[cat] / total) * 100);
-                    chartHtml += `
-                    <div style="margin-bottom:8px;">
-                        <div class="chart-label"><span>${cat}</span><span>$${catTotals[cat].toLocaleString()} (${percent}%)</span></div>
-                        <div style="width:100%; background:#F1F5F9; border-radius:4px;"><div class="chart-bar" style="width:${percent}%; background:${catColors[cat]};"></div></div>
-                    </div>`;
-                }
-            });
-            chartContent.innerHTML = chartHtml;
-        } else {
-            if(chartContainer) chartContainer.style.display = 'none';
-        }
-        
-        let balances = {}; let myShareTotal = 0; getTripMembers().forEach(m => balances[m] = 0); 
-        p.expenses.forEach(e => { 
-            const cost = parseFloat(e.cost) || 0; if (balances[e.payer] === undefined) balances[e.payer] = 0; balances[e.payer] += cost; 
-            const excludes = e.excludes || []; const shareMembers = getTripMembers().filter(m => !excludes.includes(m)); 
-            if(shareMembers.length > 0) { 
-                const costPerPerson = cost / shareMembers.length; if(shareMembers.includes(currentUser)) myShareTotal += costPerPerson; 
-                shareMembers.forEach(m => { if(balances[m] === undefined) balances[m] = 0; balances[m] -= costPerPerson; }); 
-            } 
-        });
+        renderCurrencyDropdown();
+        
+        const chartContainer = document.getElementById('expense-chart-container');
+        const chartContent = document.getElementById('expense-chart-content');
+        
+        if(!p || !p.expenses || p.expenses.length === 0) { 
+            if(list) list.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><div class="empty-state-icon">💸</div><div class="empty-state-text">目前尚無任何花費紀錄</div></div>`; 
+            if(adviceBox) adviceBox.style.display = 'none'; 
+            if(chartContainer) chartContainer.style.display = 'none';
+            document.getElementById('total-expense').textContent = "0"; document.getElementById('my-total-expense').textContent = "0"; document.getElementById('repayment-section').style.display = 'none'; 
+            return; 
+        } 
+        
+        let catTotals = { '餐飲': 0, '交通': 0, '住宿': 0, '娛樂': 0, '購物': 0, '其他': 0 };
+        const catColors = { '餐飲': '#F59E0B', '交通': '#3B82F6', '住宿': '#8B5CF6', '娛樂': '#EC4899', '購物': '#EF4444', '其他': '#94A3B8' };
+        
+        let html = '';
+        p.expenses.forEach(e => {
+            const costNum = Number(e.cost) || 0; total += costNum;
+            const category = e.category || '其他';
+            if (catTotals[category] !== undefined) catTotals[category] += costNum;
+            
+            const currency = e.currency || 'TWD'; const foreignCost = e.foreignCost || costNum;
+            let excludeText = (e.excludes && e.excludes.length > 0) ? `<div class="expense-sq-exclude">⚠️ ${e.excludes.join(', ')} 不參與</div>` : '';
+            let foreignHtml = '';
+            if (currency && currency !== 'TWD') { const info = CURRENCY_MAP[currency] || { name: '外幣' }; foreignHtml = `<div style="font-size:11px; color:var(--primary); font-weight:bold; margin-top:2px;">${currency} ${foreignCost} <span style="color:var(--text-muted); font-weight:normal;">(${info.name || currency})</span></div>`; }
+            
+            let catBadge = `<span style="font-size:10px; background:${catColors[category]}20; color:${catColors[category]}; padding:2px 6px; border-radius:6px; font-weight:bold; margin-bottom:4px; display:inline-block;">${category}</span>`;
+            
+            html += `
+            <div class="expense-square">
+                <div class="expense-sq-actions hide-in-archive">
+                    <button class="expense-sq-btn" onclick="openInlineExpEdit(${e.id})">✏️</button>
+                    <button class="expense-sq-btn" onclick="delExpense(${e.id})">✕</button>
+                </div>
+                <div><div class="expense-sq-date">${e.date || ''}</div>${catBadge}<div class="expense-sq-item" title="${e.item}">${e.item}</div>${foreignHtml}${excludeText}</div>
+                <div style="margin-top: 12px;"><div class="expense-sq-cost">$${costNum}</div><div class="expense-sq-payer">由 ${e.payer} 代墊</div></div>
+            </div>`;
+        });
+        if(list) list.innerHTML = html; document.getElementById('total-expense').textContent = Math.round(total).toLocaleString(); 
+        
+        if(chartContainer && chartContent && total > 0) {
+            chartContainer.style.display = 'block';
+            let chartHtml = '';
+            Object.keys(catTotals).forEach(cat => {
+                if(catTotals[cat] > 0) {
+                    const percent = Math.round((catTotals[cat] / total) * 100);
+                    chartHtml += `
+                    <div style="margin-bottom:8px;">
+                        <div class="chart-label"><span>${cat}</span><span>$${catTotals[cat].toLocaleString()} (${percent}%)</span></div>
+                        <div style="width:100%; background:#F1F5F9; border-radius:4px;"><div class="chart-bar" style="width:${percent}%; background:${catColors[cat]};"></div></div>
+                    </div>`;
+                }
+            });
+            chartContent.innerHTML = chartHtml;
+        } else {
+            if(chartContainer) chartContainer.style.display = 'none';
+        }
+        
+        let balances = {}; let myShareTotal = 0; getTripMembers().forEach(m => balances[m] = 0); 
+        p.expenses.forEach(e => { 
+            const cost = parseFloat(e.cost) || 0; if (balances[e.payer] === undefined) balances[e.payer] = 0; balances[e.payer] += cost; 
+            const excludes = e.excludes || []; const shareMembers = getTripMembers().filter(m => !excludes.includes(m)); 
+            if(shareMembers.length > 0) { 
+                const costPerPerson = cost / shareMembers.length; if(shareMembers.includes(currentUser)) myShareTotal += costPerPerson; 
+                shareMembers.forEach(m => { if(balances[m] === undefined) balances[m] = 0; balances[m] -= costPerPerson; }); 
+            } 
+        });
 
-        document.getElementById('my-total-expense').textContent = Math.round(myShareTotal).toLocaleString();
+        document.getElementById('my-total-expense').textContent = Math.round(myShareTotal).toLocaleString();
 
-        let repayHtml = ''; const repaySection = document.getElementById('repayment-section'); const repayList = document.getElementById('repayment-list');
-        if (p.repayments && p.repayments.length > 0) {
-            if(repaySection) repaySection.style.display = 'block';
-            p.repayments.forEach(r => {
-                if (balances[r.from] !== undefined) balances[r.from] += r.amount; if (balances[r.to] !== undefined) balances[r.to] -= r.amount;     
-                repayHtml += `<div class="repayment-item"><div style="font-size:14px; font-weight:bold;">🟢 ${r.from} ➡️ ${r.to}</div><div style="font-size:16px; font-weight:900; color:var(--secondary);">$${r.amount}</div></div>`;
-            });
-            if(repayList) repayList.innerHTML = repayHtml;
-        } else { if(repaySection) repaySection.style.display = 'none'; }
+        let repayHtml = ''; const repaySection = document.getElementById('repayment-section'); const repayList = document.getElementById('repayment-list');
+        if (p.repayments && p.repayments.length > 0) {
+            if(repaySection) repaySection.style.display = 'block';
+            p.repayments.forEach(r => {
+                if (balances[r.from] !== undefined) balances[r.from] += r.amount; if (balances[r.to] !== undefined) balances[r.to] -= r.amount;     
+                repayHtml += `<div class="repayment-item"><div style="font-size:14px; font-weight:bold;">🟢 ${r.from} ➡️ ${r.to}</div><div style="font-size:16px; font-weight:900; color:var(--secondary);">$${r.amount}</div></div>`;
+            });
+            if(repayList) repayList.innerHTML = repayHtml;
+        } else { if(repaySection) repaySection.style.display = 'none'; }
 
-        let debtors = Object.keys(balances).map(m => ({ name: m, balance: Math.round(balances[m]) })).filter(b => b.balance <= -1).sort((a,b) => a.balance - b.balance); 
-        let creditors = Object.keys(balances).map(m => ({ name: m, balance: Math.round(balances[m]) })).filter(b => b.balance >= 1).sort((a,b) => b.balance - a.balance); 
-        
-        let transfers = []; let i=0, j=0; 
-        while(i < debtors.length && j < creditors.length) { 
-            let amt = Math.min(-debtors[i].balance, creditors[j].balance); transfers.push({ from: debtors[i].name, to: creditors[j].name, amt: amt }); 
-            debtors[i].balance += amt; creditors[j].balance -= amt; if(Math.abs(debtors[i].balance) < 1) i++; if(Math.abs(creditors[j].balance) < 1) j++; 
-        } 
-        
-        if(adviceBox) {
-            if(transfers.length === 0) { adviceBox.innerHTML = `<div style="text-align:center; font-weight:800; color:var(--secondary); font-size:16px;">🎉 大家都互不相欠囉！(目前無欠款)</div>`; } 
-            else { 
-                let html = ``; 
-                transfers.forEach(t => {
-                    const bankInfo = (p.bankInfo && p.bankInfo[t.to]) || { bank: '', acc: '' };
-                    
-                    const bankStr = (bankInfo.bank || bankInfo.acc) ? 
-                        `<div style="font-size:12px; color:var(--text-muted); margin-top:6px; background:#F8F9FA; padding:4px 8px; border-radius:8px; display:inline-block;">
-                            🏦 ${bankInfo.bank} <strong style="color:var(--primary); font-size:14px; user-select:all;">${bankInfo.acc}</strong> 
-                            <span style="background:#E2E8F0; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:bold; color:var(--text-main); margin-left:4px;" onclick="copyText('${bankInfo.acc}', '📋 已複製帳號')">📋 複製</span>
-                        </div>` : 
-                        `<div style="font-size:12px; color:var(--warning); margin-top:6px; cursor:pointer;" onclick="openBankInfoModal()">➕ 尚未設定收款帳號</div>`;
-                    
-                    html += `
-                    <div style="background:white; padding:16px; border-radius:12px; margin-bottom:8px; box-shadow:0 2px 6px rgba(0,0,0,0.02); display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <span style="font-weight:bold; font-size:15px;"><strong style="color:var(--danger);">${t.from}</strong> 需給 <strong style="color:var(--text-main);">${t.to}</strong></span>
-                            <br>${bankStr}
-                        </div>
-                        <div style="text-align:right;">
-                            <span style="font-weight:800; color:var(--secondary); font-size:20px; display:block;">$${Math.round(t.amt)}</span>
-                            <button class="btn-small btn-action hide-in-archive" style="margin-top:6px; padding:6px 10px; border-radius:8px; font-size:12px; color:white !important;" onclick="settleDebt('${t.from}', '${t.to}', ${Math.round(t.amt)})">✔️ 標記已還款</button>
-                        </div>
-                    </div>`;
-                }); 
-                adviceBox.innerHTML = html; 
-            } 
-            adviceBox.style.display = 'block'; 
-        }
-    }
+        let debtors = Object.keys(balances).map(m => ({ name: m, balance: Math.round(balances[m]) })).filter(b => b.balance <= -1).sort((a,b) => a.balance - b.balance); 
+        let creditors = Object.keys(balances).map(m => ({ name: m, balance: Math.round(balances[m]) })).filter(b => b.balance >= 1).sort((a,b) => b.balance - a.balance); 
+        
+        let transfers = []; let i=0, j=0; 
+        while(i < debtors.length && j < creditors.length) { 
+            let amt = Math.min(-debtors[i].balance, creditors[j].balance); transfers.push({ from: debtors[i].name, to: creditors[j].name, amt: amt }); 
+            debtors[i].balance += amt; creditors[j].balance -= amt; if(Math.abs(debtors[i].balance) < 1) i++; if(Math.abs(creditors[j].balance) < 1) j++; 
+        } 
+        
+        if(adviceBox) {
+            if(transfers.length === 0) { adviceBox.innerHTML = `<div style="text-align:center; font-weight:800; color:var(--secondary); font-size:16px;">🎉 大家都互不相欠囉！(目前無欠款)</div>`; } 
+            else { 
+                let html = ``; 
+                transfers.forEach(t => {
+                    const bankInfo = (p.bankInfo && p.bankInfo[t.to]) || { bank: '', acc: '' };
+                    
+                    const bankStr = (bankInfo.bank || bankInfo.acc) ? 
+                        `<div style="font-size:12px; color:var(--text-muted); margin-top:6px; background:#F8F9FA; padding:4px 8px; border-radius:8px; display:inline-block;">
+                            🏦 ${bankInfo.bank} <strong style="color:var(--primary); font-size:14px; user-select:all;">${bankInfo.acc}</strong> 
+                            <span style="background:#E2E8F0; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:bold; color:var(--text-main); margin-left:4px;" onclick="copyText('${bankInfo.acc}', '📋 已複製帳號')">📋 複製</span>
+                        </div>` : 
+                        `<div style="font-size:12px; color:var(--warning); margin-top:6px; cursor:pointer;" onclick="openBankInfoModal()">➕ 尚未設定收款帳號</div>`;
+                    
+                    html += `
+                    <div style="background:white; padding:16px; border-radius:12px; margin-bottom:8px; box-shadow:0 2px 6px rgba(0,0,0,0.02); display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span style="font-weight:bold; font-size:15px;"><strong style="color:var(--danger);">${t.from}</strong> 需給 <strong style="color:var(--text-main);">${t.to}</strong></span>
+                            <br>${bankStr}
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="font-weight:800; color:var(--secondary); font-size:20px; display:block;">$${Math.round(t.amt)}</span>
+                            <button class="btn-small btn-action hide-in-archive" style="margin-top:6px; padding:6px 10px; border-radius:8px; font-size:12px; color:white !important;" onclick="settleDebt('${t.from}', '${t.to}', ${Math.round(t.amt)})">✔️ 標記已還款</button>
+                        </div>
+                    </div>`;
+                }); 
+                adviceBox.innerHTML = html; 
+            } 
+            adviceBox.style.display = 'block'; 
+        }
+    }
 
-    function showMyExpenseDetails() {
-        const p = getCurProject();
-        if (!p || !p.expenses || p.expenses.length === 0) return showCustomDialog("目前還沒有任何花費紀錄喔！");
-        const listContainer = document.getElementById('my-expense-details-list'); let html = ''; let myTotal = 0;
-        p.expenses.forEach(e => {
-            const cost = parseFloat(e.cost) || 0; const excludes = e.excludes || []; const shareMembers = getTripMembers().filter(m => !excludes.includes(m));
-            if (shareMembers.includes(currentUser) && shareMembers.length > 0) {
-                const costPerPerson = cost / shareMembers.length; myTotal += costPerPerson;
-                html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--border);"><div style="flex: 1;"><div style="font-weight: bold; font-size: 15px; color: var(--text-main);">${e.item}</div><div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">總額 $${cost} ÷ ${shareMembers.length} 人 (${e.payer} 代墊)</div></div><div style="font-weight: 800; font-size: 16px; color: var(--secondary);">$${Math.round(costPerPerson)}</div></div>`;
-            }
-        });
-        if (html === '') html = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-weight:bold;">你這趟旅程目前完全沒花到錢喔！厲害！</div>`;
-        if (listContainer) listContainer.innerHTML = html;
-        const myTotalEl = document.getElementById('my-expense-details-total'); if (myTotalEl) myTotalEl.textContent = `$${Math.round(myTotal).toLocaleString()}`;
-        openModal('my-expense-details-modal');
-    }
+    function showMyExpenseDetails() {
+        const p = getCurProject();
+        if (!p || !p.expenses || p.expenses.length === 0) return showCustomDialog("目前還沒有任何花費紀錄喔！");
+        const listContainer = document.getElementById('my-expense-details-list'); let html = ''; let myTotal = 0;
+        p.expenses.forEach(e => {
+            const cost = parseFloat(e.cost) || 0; const excludes = e.excludes || []; const shareMembers = getTripMembers().filter(m => !excludes.includes(m));
+            if (shareMembers.includes(currentUser) && shareMembers.length > 0) {
+                const costPerPerson = cost / shareMembers.length; myTotal += costPerPerson;
+                html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--border);"><div style="flex: 1;"><div style="font-weight: bold; font-size: 15px; color: var(--text-main);">${e.item}</div><div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">總額 $${cost} ÷ ${shareMembers.length} 人 (${e.payer} 代墊)</div></div><div style="font-weight: 800; font-size: 16px; color: var(--secondary);">$${Math.round(costPerPerson)}</div></div>`;
+            }
+        });
+        if (html === '') html = `<div style="text-align:center; color:var(--text-muted); padding:20px 0; font-weight:bold;">你這趟旅程目前完全沒花到錢喔！厲害！</div>`;
+        if (listContainer) listContainer.innerHTML = html;
+        const myTotalEl = document.getElementById('my-expense-details-total'); if (myTotalEl) myTotalEl.textContent = `$${Math.round(myTotal).toLocaleString()}`;
+        openModal('my-expense-details-modal');
+    }
 
-    function settleDebt(from, to, amount) {
-        if (currentUser !== to) {
-            return showCustomDialog(`⚠️ 權限限制：<br><br>這筆款項是匯給「${to}」的，為了避免爭議，只能由 <b>收款人（${to}）</b> 的手機點擊確認喔！`);
-        }
-        showCustomDialog(`確定已收到 ${from} 匯來的 $${amount} 嗎？`, true, () => { 
-            withLoader(() => { 
-                const p = getCurProject(); if(!p.repayments) p.repayments = []; 
-                p.repayments.push({ id: Date.now(), from: from, to: to, amount: amount, date: new Date().toISOString().split('T')[0] }); 
-                updateCurProject(p); renderBudget(); showSync("✅ 已將此筆欠款結清", 1500); 
+    function settleDebt(from, to, amount) {
+        if (currentUser !== to) {
+            return showCustomDialog(`⚠️ 權限限制：<br><br>這筆款項是匯給「${to}」的，為了避免爭議，只能由 <b>收款人（${to}）</b> 的手機點擊確認喔！`);
+        }
+        showCustomDialog(`確定已收到 ${from} 匯來的 $${amount} 嗎？`, true, () => { 
+            withLoader(() => { 
+                const p = getCurProject(); if(!p.repayments) p.repayments = []; 
+                p.repayments.push({ id: Date.now(), from: from, to: to, amount: amount, date: new Date().toISOString().split('T')[0] }); 
+                updateCurProject(p); renderBudget(); showSync("✅ 已將此筆欠款結清", 1500); 
 
-                const tripName = p.location || "旅程";
-                sendAutoLineNotification(`✅【${tripName}】還款確認！\n\n[${to}] 已確認收到 [${from}] 匯來的 $${amount.toLocaleString()} 囉！\n目前的結算進度已更新。`);
-            }); 
-        }); 
-    }
+                const tripName = p.location || "旅程";
+                sendAutoLineNotification(`✅【${tripName}】還款確認！\n\n[${to}] 已確認收到 [${from}] 匯來的 $${amount.toLocaleString()} 囉！\n目前的結算進度已更新。`);
+            }); 
+        }); 
+    }
 
-    function delExpense(id) { showCustomDialog("確定刪除這筆花費？", true, () => { withLoader(() => { const p = getCurProject(); p.expenses = p.expenses.filter(x => x.id !== id); updateCurProject(p); renderBudget(); }); }); }
+    function delExpense(id) { showCustomDialog("確定刪除這筆花費？", true, () => { withLoader(() => { const p = getCurProject(); p.expenses = p.expenses.filter(x => x.id !== id); updateCurProject(p); renderBudget(); }); }); }
 
-    function openInlineExpEdit(id) {
-        const p = getCurProject(); const exp = p.expenses.find(x => x.id === id); if(!exp) return;
-        const idInput = document.getElementById('edit-exp-id'); if(idInput) idInput.value = exp.id;
-        const dateInput = document.getElementById('edit-exp-date'); if(dateInput) dateInput.value = exp.date || '';
-        const itemInput = document.getElementById('edit-exp-item'); if(itemInput) itemInput.value = exp.item;
-        
-        const catSel = document.getElementById('edit-exp-category'); if(catSel) catSel.value = exp.category || '其他';
-        
-        renderCurrencyDropdown(); 
-        const currSel = document.getElementById('edit-exp-currency'); if(currSel) currSel.value = exp.currency || 'TWD';
-        const costInput = document.getElementById('edit-exp-cost'); if(costInput) costInput.value = exp.foreignCost || exp.cost;
-        const payerSel = document.getElementById('edit-exp-payer'); if(payerSel) payerSel.innerHTML = getTripMembers().map(m => `<option value="${m}" ${m===exp.payer?'selected':''}>${m}</option>`).join('');
-        updateEditExpCostCalc(); openModal('inline-exp-edit-modal');
-    }
+    function openInlineExpEdit(id) {
+        const p = getCurProject(); const exp = p.expenses.find(x => x.id === id); if(!exp) return;
+        const idInput = document.getElementById('edit-exp-id'); if(idInput) idInput.value = exp.id;
+        const dateInput = document.getElementById('edit-exp-date'); if(dateInput) dateInput.value = exp.date || '';
+        const itemInput = document.getElementById('edit-exp-item'); if(itemInput) itemInput.value = exp.item;
+        
+        const catSel = document.getElementById('edit-exp-category'); if(catSel) catSel.value = exp.category || '其他';
+        
+        renderCurrencyDropdown(); 
+        const currSel = document.getElementById('edit-exp-currency'); if(currSel) currSel.value = exp.currency || 'TWD';
+        const costInput = document.getElementById('edit-exp-cost'); if(costInput) costInput.value = exp.foreignCost || exp.cost;
+        const payerSel = document.getElementById('edit-exp-payer'); if(payerSel) payerSel.innerHTML = getTripMembers().map(m => `<option value="${m}" ${m===exp.payer?'selected':''}>${m}</option>`).join('');
+        updateEditExpCostCalc(); openModal('inline-exp-edit-modal');
+    }
 
-    function saveInlineExp() {
-        const idInput = document.getElementById('edit-exp-id'); const id = idInput ? parseInt(idInput.value) : 0;
-        const itemInput = document.getElementById('edit-exp-item'); const item = itemInput ? itemInput.value.trim() : '';
-        const currSel = document.getElementById('edit-exp-currency'); const currency = currSel ? currSel.value : 'TWD';
-        const costInput = document.getElementById('edit-exp-cost'); const foreignCost = costInput ? parseFloat(costInput.value) : NaN;
-        const catSel = document.getElementById('edit-exp-category'); const category = catSel ? catSel.value : '其他';
-        
-        if(!item || isNaN(foreignCost)) return showCustomDialog("請完整填寫項目與金額！");
-        
-        let twdCost = foreignCost; let rateUsed = 1;
-        if (currency !== 'TWD') { const p = getCurProject(); rateUsed = p.exchangeRates ? p.exchangeRates[currency] : defaultExchangeRates[currency]; twdCost = Math.round(foreignCost * rateUsed); }
+    function saveInlineExp() {
+        const idInput = document.getElementById('edit-exp-id'); const id = idInput ? parseInt(idInput.value) : 0;
+        const itemInput = document.getElementById('edit-exp-item'); const item = itemInput ? itemInput.value.trim() : '';
+        const currSel = document.getElementById('edit-exp-currency'); const currency = currSel ? currSel.value : 'TWD';
+        const costInput = document.getElementById('edit-exp-cost'); const foreignCost = costInput ? parseFloat(costInput.value) : NaN;
+        const catSel = document.getElementById('edit-exp-category'); const category = catSel ? catSel.value : '其他';
+        
+        if(!item || isNaN(foreignCost)) return showCustomDialog("請完整填寫項目與金額！");
+        
+        let twdCost = foreignCost; let rateUsed = 1;
+        if (currency !== 'TWD') { const p = getCurProject(); rateUsed = p.exchangeRates ? p.exchangeRates[currency] : defaultExchangeRates[currency]; twdCost = Math.round(foreignCost * rateUsed); }
 
-        withLoader(() => {
-            const p = getCurProject(); const exp = p.expenses.find(x => x.id === id); if(!exp) return; 
-            const dateInput = document.getElementById('edit-exp-date'); exp.date = dateInput ? dateInput.value : ''; 
-            exp.item = item; exp.category = category; exp.cost = twdCost; exp.currency = currency; exp.foreignCost = foreignCost; exp.rate = rateUsed;
-            const payerSel = document.getElementById('edit-exp-payer'); if(payerSel) exp.payer = payerSel.value; 
-            updateCurProject(p); closeModal('inline-exp-edit-modal'); renderBudget(); showSync("✅ 帳目已更新", 1500); 
-        });
-    }
+        withLoader(() => {
+            const p = getCurProject(); const exp = p.expenses.find(x => x.id === id); if(!exp) return; 
+            const dateInput = document.getElementById('edit-exp-date'); exp.date = dateInput ? dateInput.value : ''; 
+            exp.item = item; exp.category = category; exp.cost = twdCost; exp.currency = currency; exp.foreignCost = foreignCost; exp.rate = rateUsed;
+            const payerSel = document.getElementById('edit-exp-payer'); if(payerSel) exp.payer = payerSel.value; 
+            updateCurProject(p); closeModal('inline-exp-edit-modal'); renderBudget(); showSync("✅ 帳目已更新", 1500); 
+        });
+    }
 
-    function renderExclusionList() { const userSel = document.getElementById('exclusion-user-select'); const user = userSel ? userSel.value : ''; const container = document.getElementById('exclusion-checkboxes'); if(!user) { if(container) container.innerHTML = ''; return; } const p = getCurProject(); if(!p.expenses || p.expenses.length === 0) { if(container) container.innerHTML = '<p style="padding:10px; color:#A0A0A0; text-align:center; font-weight:bold;">目前沒有花費紀錄</p>'; return; } let html = ''; p.expenses.forEach(e => { const isPaying = !(e.excludes && e.excludes.includes(user)); html += `<label class="checkbox-item"><div style="flex:1;"><strong>${e.item}</strong> ($${e.cost}) <br><span style="font-size:11px; color:#888;">由 ${e.payer} 代墊</span></div><input type="checkbox" style="display:none;" onchange="withLoader(() => toggleExclusion(${e.id}, '${user}', this.checked))" ${isPaying ? 'checked' : ''}><div class="toggle-switch"></div></label>`; }); if(container) container.innerHTML = html; }
-    function toggleExclusion(expId, user, isPaying) { const p = getCurProject(); const exp = p.expenses.find(x => x.id === expId); if(!exp) return; if(!exp.excludes) exp.excludes = []; if(isPaying) exp.excludes = exp.excludes.filter(u => u !== user); else if(!exp.excludes.includes(user)) exp.excludes.push(user); updateCurProject(p); renderBudget(); }
+    function renderExclusionList() { const userSel = document.getElementById('exclusion-user-select'); const user = userSel ? userSel.value : ''; const container = document.getElementById('exclusion-checkboxes'); if(!user) { if(container) container.innerHTML = ''; return; } const p = getCurProject(); if(!p.expenses || p.expenses.length === 0) { if(container) container.innerHTML = '<p style="padding:10px; color:#A0A0A0; text-align:center; font-weight:bold;">目前沒有花費紀錄</p>'; return; } let html = ''; p.expenses.forEach(e => { const isPaying = !(e.excludes && e.excludes.includes(user)); html += `<label class="checkbox-item"><div style="flex:1;"><strong>${e.item}</strong> ($${e.cost}) <br><span style="font-size:11px; color:#888;">由 ${e.payer} 代墊</span></div><input type="checkbox" style="display:none;" onchange="withLoader(() => toggleExclusion(${e.id}, '${user}', this.checked))" ${isPaying ? 'checked' : ''}><div class="toggle-switch"></div></label>`; }); if(container) container.innerHTML = html; }
+    function toggleExclusion(expId, user, isPaying) { const p = getCurProject(); const exp = p.expenses.find(x => x.id === expId); if(!exp) return; if(!exp.excludes) exp.excludes = []; if(isPaying) exp.excludes = exp.excludes.filter(u => u !== user); else if(!exp.excludes.includes(user)) exp.excludes.push(user); updateCurProject(p); renderBudget(); }
 
-    function openBankInfoModal() { const p = getCurProject(); if(!p.bankInfo) p.bankInfo = {}; let html = ''; getTripMembers().forEach(m => { const info = p.bankInfo[m] || {bank:'', acc:''}; html += `<div style="margin-bottom:16px;"><label style="font-weight:bold; font-size:14px;">${m} 的收款帳號</label><div style="display:flex; gap:8px; margin-top:4px;"><input type="text" id="bank-name-${m}" class="form-control" style="flex:1; margin:0; padding:12px;" placeholder="銀行/代碼" value="${info.bank}"><input type="text" id="bank-acc-${m}" class="form-control" style="flex:2; margin:0; padding:12px;" placeholder="純數字帳號" value="${info.acc}"></div></div>`; }); const container = document.getElementById('bank-info-container'); if(container) container.innerHTML = html; openModal('bank-info-modal'); }
-    function saveBankInfo() { withLoader(() => { const p = getCurProject(); if(!p.bankInfo) p.bankInfo = {}; getTripMembers().forEach(m => { const nameInput = document.getElementById(`bank-name-${m}`); const accInput = document.getElementById(`bank-acc-${m}`); p.bankInfo[m] = { bank: nameInput ? nameInput.value.trim() : '', acc: accInput ? accInput.value.trim() : '' }; }); updateCurProject(p); closeModal('bank-info-modal'); renderBudget(); showSync("✅ 收款帳號已更新", 1500); }); }
+    function openBankInfoModal() { const p = getCurProject(); if(!p.bankInfo) p.bankInfo = {}; let html = ''; getTripMembers().forEach(m => { const info = p.bankInfo[m] || {bank:'', acc:''}; html += `<div style="margin-bottom:16px;"><label style="font-weight:bold; font-size:14px;">${m} 的收款帳號</label><div style="display:flex; gap:8px; margin-top:4px;"><input type="text" id="bank-name-${m}" class="form-control" style="flex:1; margin:0; padding:12px;" placeholder="銀行/代碼" value="${info.bank}"><input type="text" id="bank-acc-${m}" class="form-control" style="flex:2; margin:0; padding:12px;" placeholder="純數字帳號" value="${info.acc}"></div></div>`; }); const container = document.getElementById('bank-info-container'); if(container) container.innerHTML = html; openModal('bank-info-modal'); }
+    function saveBankInfo() { withLoader(() => { const p = getCurProject(); if(!p.bankInfo) p.bankInfo = {}; getTripMembers().forEach(m => { const nameInput = document.getElementById(`bank-name-${m}`); const accInput = document.getElementById(`bank-acc-${m}`); p.bankInfo[m] = { bank: nameInput ? nameInput.value.trim() : '', acc: accInput ? accInput.value.trim() : '' }; }); updateCurProject(p); closeModal('bank-info-modal'); renderBudget(); showSync("✅ 收款帳號已更新", 1500); }); }
 
-    // --- 📝 筆記 ---
-    function renderNotes() { const p = getCurProject(); const list = document.getElementById('notes-list'); const countBadge = document.getElementById('note-count'); if(!list) return; if(!p.notes || p.notes.length === 0) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📝</div><div class="empty-state-text">還沒有任何筆記喔，記點什麼吧！</div></div>`; if(countBadge) countBadge.style.display = 'none'; return; } if(countBadge) { countBadge.textContent = p.notes.length; countBadge.style.display = 'flex'; } list.innerHTML = p.notes.map(n => `<div class="card-panel" style="padding:20px; background:#FFFDE7; border-left: 6px solid var(--warning);"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><div style="white-space: pre-wrap; font-size:15px; flex:1; font-weight:500;">${n.text}</div><div style="display:flex; flex-direction:column; gap:6px;"><span class="action-text edit-text hide-in-archive" style="margin:0; padding:6px 10px;" onclick="editNote(${n.id})">✏️</span><span class="action-text del-text hide-in-archive" style="margin:0; padding:6px 10px;" onclick="delNote(${n.id})">✕</span></div></div><div class="creator-badge" style="background:rgba(255, 193, 7, 0.2); color:#A67B00;">由 ${n.creator} 記錄</div></div>`).join(''); }
-    function addOrUpdateNote() { const textInput = document.getElementById('note-text'); const text = textInput ? textInput.value : ''; const editIdInput = document.getElementById('edit-note-id'); const editId = editIdInput ? editIdInput.value : ''; if(!text) return showCustomDialog("請輸入筆記內容！"); withLoader(() => { const p = getCurProject(); if(!p.notes) p.notes = []; if(editId) { const idx = p.notes.findIndex(x => x.id == editId); if(idx > -1) p.notes[idx].text = text; cancelEditNote(); } else p.notes.push({ id: Date.now(), text: text, creator: currentUser }); updateCurProject(p); renderNotes(); }); }
-    function editNote(id) { const p = getCurProject(); const note = p.notes.find(x => x.id === id); if(!note) return; const textInput = document.getElementById('note-text'); if(textInput) textInput.value = note.text; const idInput = document.getElementById('edit-note-id'); if(idInput) idInput.value = note.id; const titleEl = document.getElementById('note-form-title'); if(titleEl) titleEl.innerHTML = "✏️ 編輯記事"; const btnEl = document.getElementById('save-note-btn'); if(btnEl) btnEl.innerHTML = "更新"; const cancelBtn = document.getElementById('cancel-note-btn'); if(cancelBtn) cancelBtn.style.display = "block"; const cardEl = document.getElementById('note-form-card'); if(cardEl) cardEl.classList.add('edit-mode-active'); }
-    function cancelEditNote() { const textInput = document.getElementById('note-text'); if(textInput) textInput.value = ''; const idInput = document.getElementById('edit-note-id'); if(idInput) idInput.value = ''; const titleEl = document.getElementById('note-form-title'); if(titleEl) titleEl.innerHTML = "新增記事"; const btnEl = document.getElementById('save-note-btn'); if(btnEl) btnEl.innerHTML = "儲存"; const cancelBtn = document.getElementById('cancel-note-btn'); if(cancelBtn) cancelBtn.style.display = "none"; const cardEl = document.getElementById('note-form-card'); if(cardEl) cardEl.classList.remove('edit-mode-active'); }
-    function delNote(id) { showCustomDialog("確定刪除此記事？", true, () => { withLoader(() => { const p = getCurProject(); p.notes = p.notes.filter(x => x.id !== id); updateCurProject(p); renderNotes(); }); }); }
+    // --- 📝 筆記 ---
+    function renderNotes() { const p = getCurProject(); const list = document.getElementById('notes-list'); const countBadge = document.getElementById('note-count'); if(!list) return; if(!p.notes || p.notes.length === 0) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📝</div><div class="empty-state-text">還沒有任何筆記喔，記點什麼吧！</div></div>`; if(countBadge) countBadge.style.display = 'none'; return; } if(countBadge) { countBadge.textContent = p.notes.length; countBadge.style.display = 'flex'; } list.innerHTML = p.notes.map(n => `<div class="card-panel" style="padding:20px; background:#FFFDE7; border-left: 6px solid var(--warning);"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><div style="white-space: pre-wrap; font-size:15px; flex:1; font-weight:500;">${n.text}</div><div style="display:flex; flex-direction:column; gap:6px;"><span class="action-text edit-text hide-in-archive" style="margin:0; padding:6px 10px;" onclick="editNote(${n.id})">✏️</span><span class="action-text del-text hide-in-archive" style="margin:0; padding:6px 10px;" onclick="delNote(${n.id})">✕</span></div></div><div class="creator-badge" style="background:rgba(255, 193, 7, 0.2); color:#A67B00;">由 ${n.creator} 記錄</div></div>`).join(''); }
+    function addOrUpdateNote() { const textInput = document.getElementById('note-text'); const text = textInput ? textInput.value : ''; const editIdInput = document.getElementById('edit-note-id'); const editId = editIdInput ? editIdInput.value : ''; if(!text) return showCustomDialog("請輸入筆記內容！"); withLoader(() => { const p = getCurProject(); if(!p.notes) p.notes = []; if(editId) { const idx = p.notes.findIndex(x => x.id == editId); if(idx > -1) p.notes[idx].text = text; cancelEditNote(); } else p.notes.push({ id: Date.now(), text: text, creator: currentUser }); updateCurProject(p); renderNotes(); }); }
+    function editNote(id) { const p = getCurProject(); const note = p.notes.find(x => x.id === id); if(!note) return; const textInput = document.getElementById('note-text'); if(textInput) textInput.value = note.text; const idInput = document.getElementById('edit-note-id'); if(idInput) idInput.value = note.id; const titleEl = document.getElementById('note-form-title'); if(titleEl) titleEl.innerHTML = "✏️ 編輯記事"; const btnEl = document.getElementById('save-note-btn'); if(btnEl) btnEl.innerHTML = "更新"; const cancelBtn = document.getElementById('cancel-note-btn'); if(cancelBtn) cancelBtn.style.display = "block"; const cardEl = document.getElementById('note-form-card'); if(cardEl) cardEl.classList.add('edit-mode-active'); }
+    function cancelEditNote() { const textInput = document.getElementById('note-text'); if(textInput) textInput.value = ''; const idInput = document.getElementById('edit-note-id'); if(idInput) idInput.value = ''; const titleEl = document.getElementById('note-form-title'); if(titleEl) titleEl.innerHTML = "新增記事"; const btnEl = document.getElementById('save-note-btn'); if(btnEl) btnEl.innerHTML = "儲存"; const cancelBtn = document.getElementById('cancel-note-btn'); if(cancelBtn) cancelBtn.style.display = "none"; const cardEl = document.getElementById('note-form-card'); if(cardEl) cardEl.classList.remove('edit-mode-active'); }
+    function delNote(id) { showCustomDialog("確定刪除此記事？", true, () => { withLoader(() => { const p = getCurProject(); p.notes = p.notes.filter(x => x.id !== id); updateCurProject(p); renderNotes(); }); }); }
 
-    // --- 📞 工具與投票 ---
-    function renderContacts() { const p = getCurProject(); const list = document.getElementById('contacts-list'); if(!list) return; if(!p.contacts || p.contacts.length === 0) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📞</div><div class="empty-state-text">還沒有聯絡人資料</div></div>`; return; } list.innerHTML = p.contacts.map(c => `<div class="card-panel" style="padding:20px;"><div style="display:flex; justify-content:space-between;"><strong style="font-size:18px;">${c.name}</strong><div><span class="action-text edit-text hide-in-archive" onclick="editContact(${c.id})">✏️</span><span class="action-text del-text hide-in-archive" style="margin:0;" onclick="delContact(${c.id})">✕</span></div></div><div style="font-size:16px; color:var(--text-muted); font-weight:bold; margin: 8px 0;">${c.phone}</div><div class="tool-btn-wrap"><button class="tool-btn" onclick="copyText('${c.phone}', '📋 電話已複製')">📋 複製</button><a href="tel:${c.phone}" class="tool-btn call">📞 撥打</a></div></div>`).join(''); }
-    function addOrUpdateContact() { const nameInput = document.getElementById('contact-name'); const name = nameInput ? nameInput.value : ''; const phoneInput = document.getElementById('contact-phone'); const phone = phoneInput ? phoneInput.value : ''; const editIdInput = document.getElementById('edit-contact-id'); const editId = editIdInput ? editIdInput.value : ''; if(!name || !phone) return showCustomDialog("請完整填寫名稱與電話！"); withLoader(() => { const p = getCurProject(); if(!p.contacts) p.contacts = []; if(editId) { const idx = p.contacts.findIndex(x => x.id == editId); if(idx>-1) {p.contacts[idx].name=name; p.contacts[idx].phone=phone;} cancelEditContact(); } else p.contacts.push({ id: Date.now(), name, phone, creator: currentUser }); updateCurProject(p); renderContacts(); }); }
-    function editContact(id) { const p = getCurProject(); const contact = p.contacts.find(x => x.id === id); if(!contact) return; const nameInput = document.getElementById('contact-name'); if(nameInput) nameInput.value = contact.name; const phoneInput = document.getElementById('contact-phone'); if(phoneInput) phoneInput.value = contact.phone; const idInput = document.getElementById('edit-contact-id'); if(idInput) idInput.value = contact.id; const titleEl = document.getElementById('contact-form-title'); if(titleEl) titleEl.innerHTML = "✏️ 編輯聯絡人"; const btnEl = document.getElementById('save-contact-btn'); if(btnEl) btnEl.innerHTML = "更新"; const cancelBtn = document.getElementById('cancel-contact-btn'); if(cancelBtn) cancelBtn.style.display = "block"; const cardEl = document.getElementById('contact-form-card'); if(cardEl) cardEl.classList.add('edit-mode-active'); }
-    function cancelEditContact() { const nameInput = document.getElementById('contact-name'); if(nameInput) nameInput.value=''; const phoneInput = document.getElementById('contact-phone'); if(phoneInput) phoneInput.value=''; const idInput = document.getElementById('edit-contact-id'); if(idInput) idInput.value=''; const titleEl = document.getElementById('contact-form-title'); if(titleEl) titleEl.innerHTML = "新增聯絡人"; const btnEl = document.getElementById('save-contact-btn'); if(btnEl) btnEl.innerHTML = "儲存"; const cancelBtn = document.getElementById('cancel-contact-btn'); if(cancelBtn) cancelBtn.style.display = "none"; const cardEl = document.getElementById('contact-form-card'); if(cardEl) cardEl.classList.remove('edit-mode-active'); }
-    function delContact(id) { showCustomDialog("確定移除聯絡人？", true, () => { withLoader(() => { const p = getCurProject(); p.contacts = p.contacts.filter(x => x.id !== id); updateCurProject(p); renderContacts(); }); }); }
+    // --- 📞 工具與投票 ---
+    function renderContacts() { const p = getCurProject(); const list = document.getElementById('contacts-list'); if(!list) return; if(!p.contacts || p.contacts.length === 0) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📞</div><div class="empty-state-text">還沒有聯絡人資料</div></div>`; return; } list.innerHTML = p.contacts.map(c => `<div class="card-panel" style="padding:20px;"><div style="display:flex; justify-content:space-between;"><strong style="font-size:18px;">${c.name}</strong><div><span class="action-text edit-text hide-in-archive" onclick="editContact(${c.id})">✏️</span><span class="action-text del-text hide-in-archive" style="margin:0;" onclick="delContact(${c.id})">✕</span></div></div><div style="font-size:16px; color:var(--text-muted); font-weight:bold; margin: 8px 0;">${c.phone}</div><div class="tool-btn-wrap"><button class="tool-btn" onclick="copyText('${c.phone}', '📋 電話已複製')">📋 複製</button><a href="tel:${c.phone}" class="tool-btn call">📞 撥打</a></div></div>`).join(''); }
+    function addOrUpdateContact() { const nameInput = document.getElementById('contact-name'); const name = nameInput ? nameInput.value : ''; const phoneInput = document.getElementById('contact-phone'); const phone = phoneInput ? phoneInput.value : ''; const editIdInput = document.getElementById('edit-contact-id'); const editId = editIdInput ? editIdInput.value : ''; if(!name || !phone) return showCustomDialog("請完整填寫名稱與電話！"); withLoader(() => { const p = getCurProject(); if(!p.contacts) p.contacts = []; if(editId) { const idx = p.contacts.findIndex(x => x.id == editId); if(idx>-1) {p.contacts[idx].name=name; p.contacts[idx].phone=phone;} cancelEditContact(); } else p.contacts.push({ id: Date.now(), name, phone, creator: currentUser }); updateCurProject(p); renderContacts(); }); }
+    function editContact(id) { const p = getCurProject(); const contact = p.contacts.find(x => x.id === id); if(!contact) return; const nameInput = document.getElementById('contact-name'); if(nameInput) nameInput.value = contact.name; const phoneInput = document.getElementById('contact-phone'); if(phoneInput) phoneInput.value = contact.phone; const idInput = document.getElementById('edit-contact-id'); if(idInput) idInput.value = contact.id; const titleEl = document.getElementById('contact-form-title'); if(titleEl) titleEl.innerHTML = "✏️ 編輯聯絡人"; const btnEl = document.getElementById('save-contact-btn'); if(btnEl) btnEl.innerHTML = "更新"; const cancelBtn = document.getElementById('cancel-contact-btn'); if(cancelBtn) cancelBtn.style.display = "block"; const cardEl = document.getElementById('contact-form-card'); if(cardEl) cardEl.classList.add('edit-mode-active'); }
+    function cancelEditContact() { const nameInput = document.getElementById('contact-name'); if(nameInput) nameInput.value=''; const phoneInput = document.getElementById('contact-phone'); if(phoneInput) phoneInput.value=''; const idInput = document.getElementById('edit-contact-id'); if(idInput) idInput.value=''; const titleEl = document.getElementById('contact-form-title'); if(titleEl) titleEl.innerHTML = "新增聯絡人"; const btnEl = document.getElementById('save-contact-btn'); if(btnEl) btnEl.innerHTML = "儲存"; const cancelBtn = document.getElementById('cancel-contact-btn'); if(cancelBtn) cancelBtn.style.display = "none"; const cardEl = document.getElementById('contact-form-card'); if(cardEl) cardEl.classList.remove('edit-mode-active'); }
+    function delContact(id) { showCustomDialog("確定移除聯絡人？", true, () => { withLoader(() => { const p = getCurProject(); p.contacts = p.contacts.filter(x => x.id !== id); updateCurProject(p); renderContacts(); }); }); }
 
-    function addPollOptionField(val = "") { const container = document.getElementById('poll-options-container'); if(!container) return; const count = container.querySelectorAll('.poll-opt-row').length + 1; const div = document.createElement('div'); div.className = 'poll-opt-row'; div.innerHTML = `<input type="text" class="form-control poll-opt-input" style="margin:0;" placeholder="選項 ${count}" value="${val}"><button class="remove-opt-btn" onclick="this.parentElement.remove()" style="background:transparent; border:none; color:var(--danger); font-size:18px; font-weight:bold; cursor:pointer; padding:4px 8px;"><span style="line-height:1;">✕</span></button>`; container.appendChild(div); }
-    function checkPollNotification() { const p = getCurProject(); const dot = document.getElementById('more-poll-dot'); const innerDot = document.getElementById('inner-poll-dot'); if(!p || !p.polls || p.polls.length === 0) { if(dot) dot.style.display = 'none'; if(innerDot) innerDot.style.display = 'none'; return; } const hasUnvoted = p.polls.some(poll => !poll.options.some(opt => opt.voters.includes(currentUser))); if(dot) dot.style.display = hasUnvoted ? 'flex' : 'none'; if(innerDot) innerDot.style.display = hasUnvoted ? 'flex' : 'none'; }
-    
-    function renderPolls() { 
-        const p = getCurProject(); const list = document.getElementById('polls-list'); if(!list) return; checkPollNotification(); 
-        if(!p.polls || p.polls.length === 0) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🗳️</div><div class="empty-state-text">目前沒有發起的投票</div></div>`; return; } 
-        list.innerHTML = p.polls.map(poll => {
-            const dateStr = poll.date ? `<div style="font-size:12px; color:var(--text-muted); font-weight:bold; margin-bottom:8px;">📅 期限: ${poll.date}</div>` : '';
-            const typeStr = poll.isMultipleChoice === false ? '🔘 單選' : '☑️ 複選';
-            return `<div class="card-panel">${dateStr}<div class="flex-row" style="justify-content:space-between; margin-bottom:16px;"><h4 style="margin:0; font-size:18px; color:var(--text-main); font-weight:800;">📋 ${poll.title} <span style="font-size:11px; background:#E4E8ED; padding:4px 8px; border-radius:8px; color:var(--text-muted); vertical-align:middle; font-weight:bold; margin-left:6px;">${typeStr}</span></h4><div><span class="action-text edit-text hide-in-archive" onclick="editPoll(${poll.id})">✏️</span><span class="action-text del-text hide-in-archive" style="margin:0;" onclick="delPoll(${poll.id})">✕</span></div></div>${poll.options.map((opt, i) => { const isVoted = opt.voters.includes(currentUser); return `<div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:${isVoted ? '#E8F4FD' : '#FAFBFC'}; margin-top:8px; border-radius:12px; cursor:pointer; border: 2px solid ${isVoted ? '#0284C7' : 'transparent'}; transition:0.2s;" onclick="vote(${poll.id}, ${i})"><span style="font-weight:bold; color:${isVoted ? '#0284C7' : 'var(--text-main)'};">${opt.name}</span><span style="background:${isVoted ? '#0284C7' : '#E5E5EA'}; color:${isVoted ? 'white' : 'var(--text-muted)'}; padding:4px 12px; border-radius:10px; font-size:13px; font-weight:bold;">${opt.voters.length} 票</span></div>${opt.voters.length > 0 ? `<div style="font-size:12px; color:#888; margin: 6px 0 0 16px; font-weight:bold;">已投: ${opt.voters.join(', ')}</div>` : ''}`; }).join('')}<div class="creator-badge" style="margin-top:12px;">發布者: ${poll.creator}</div></div>`;
-        }).join(''); 
-    }
-    
-    function addOrUpdatePoll() { 
-        const titleInput = document.getElementById('poll-title'); const title = titleInput ? titleInput.value : ''; const idInput = document.getElementById('edit-poll-id'); const editId = idInput ? idInput.value : ''; const dateInput = document.getElementById('poll-date'); const pollDate = dateInput ? dateInput.value : '';
-        const typeSel = document.getElementById('poll-type'); const isMultipleChoice = typeSel ? typeSel.value === 'multiple' : true;
-        const optInputs = document.querySelectorAll('.poll-opt-input'); const options = []; optInputs.forEach(input => { const val = input.value.trim(); if(val) options.push({ name: val, voters: [] }); });
-        if(!title || options.length < 2) return showCustomDialog("請輸入問題，並至少填寫兩個選項！"); 
-        withLoader(() => {
-            const p = getCurProject(); if(!p.polls) p.polls=[]; 
-            let isNew = false;
-            if(editId) { const idx = p.polls.findIndex(x => x.id == editId); if(idx > -1) { const oldOptions = p.polls[idx].options; options.forEach(newOpt => { const matchedOld = oldOptions.find(o => o.name === newOpt.name); if(matchedOld) newOpt.voters = matchedOld.voters; }); p.polls[idx].title = title; p.polls[idx].date = pollDate; p.polls[idx].isMultipleChoice = isMultipleChoice; p.polls[idx].options = options; } cancelEditPoll(); showSync("✅ 投票已更新", 1500); } 
-            else { p.polls.push({ id: Date.now(), title, date: pollDate, isMultipleChoice, creator: currentUser, options }); isNew = true; } 
-            updateCurProject(p); renderPolls(); const formCard = document.getElementById('poll-form-card'); if(formCard) formCard.style.display = 'none'; const btn = document.getElementById('show-poll-btn'); if(btn) btn.style.display = 'block'; 
+    function addPollOptionField(val = "") { const container = document.getElementById('poll-options-container'); if(!container) return; const count = container.querySelectorAll('.poll-opt-row').length + 1; const div = document.createElement('div'); div.className = 'poll-opt-row'; div.innerHTML = `<input type="text" class="form-control poll-opt-input" style="margin:0;" placeholder="選項 ${count}" value="${val}"><button class="remove-opt-btn" onclick="this.parentElement.remove()" style="background:transparent; border:none; color:var(--danger); font-size:18px; font-weight:bold; cursor:pointer; padding:4px 8px;"><span style="line-height:1;">✕</span></button>`; container.appendChild(div); }
+    function checkPollNotification() { const p = getCurProject(); const dot = document.getElementById('more-poll-dot'); const innerDot = document.getElementById('inner-poll-dot'); if(!p || !p.polls || p.polls.length === 0) { if(dot) dot.style.display = 'none'; if(innerDot) innerDot.style.display = 'none'; return; } const hasUnvoted = p.polls.some(poll => !poll.options.some(opt => opt.voters.includes(currentUser))); if(dot) dot.style.display = hasUnvoted ? 'flex' : 'none'; if(innerDot) innerDot.style.display = hasUnvoted ? 'flex' : 'none'; }
+    
+    function renderPolls() { 
+        const p = getCurProject(); const list = document.getElementById('polls-list'); if(!list) return; checkPollNotification(); 
+        if(!p.polls || p.polls.length === 0) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🗳️</div><div class="empty-state-text">目前沒有發起的投票</div></div>`; return; } 
+        list.innerHTML = p.polls.map(poll => {
+            const dateStr = poll.date ? `<div style="font-size:12px; color:var(--text-muted); font-weight:bold; margin-bottom:8px;">📅 期限: ${poll.date}</div>` : '';
+            const typeStr = poll.isMultipleChoice === false ? '🔘 單選' : '☑️ 複選';
+            return `<div class="card-panel">${dateStr}<div class="flex-row" style="justify-content:space-between; margin-bottom:16px;"><h4 style="margin:0; font-size:18px; color:var(--text-main); font-weight:800;">📋 ${poll.title} <span style="font-size:11px; background:#E4E8ED; padding:4px 8px; border-radius:8px; color:var(--text-muted); vertical-align:middle; font-weight:bold; margin-left:6px;">${typeStr}</span></h4><div><span class="action-text edit-text hide-in-archive" onclick="editPoll(${poll.id})">✏️</span><span class="action-text del-text hide-in-archive" style="margin:0;" onclick="delPoll(${poll.id})">✕</span></div></div>${poll.options.map((opt, i) => { const isVoted = opt.voters.includes(currentUser); return `<div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:${isVoted ? '#E8F4FD' : '#FAFBFC'}; margin-top:8px; border-radius:12px; cursor:pointer; border: 2px solid ${isVoted ? '#0284C7' : 'transparent'}; transition:0.2s;" onclick="vote(${poll.id}, ${i})"><span style="font-weight:bold; color:${isVoted ? '#0284C7' : 'var(--text-main)'};">${opt.name}</span><span style="background:${isVoted ? '#0284C7' : '#E5E5EA'}; color:${isVoted ? 'white' : 'var(--text-muted)'}; padding:4px 12px; border-radius:10px; font-size:13px; font-weight:bold;">${opt.voters.length} 票</span></div>${opt.voters.length > 0 ? `<div style="font-size:12px; color:#888; margin: 6px 0 0 16px; font-weight:bold;">已投: ${opt.voters.join(', ')}</div>` : ''}`; }).join('')}<div class="creator-badge" style="margin-top:12px;">發布者: ${poll.creator}</div></div>`;
+        }).join(''); 
+    }
+    
+    function addOrUpdatePoll() { 
+        const titleInput = document.getElementById('poll-title'); const title = titleInput ? titleInput.value : ''; const idInput = document.getElementById('edit-poll-id'); const editId = idInput ? idInput.value : ''; const dateInput = document.getElementById('poll-date'); const pollDate = dateInput ? dateInput.value : '';
+        const typeSel = document.getElementById('poll-type'); const isMultipleChoice = typeSel ? typeSel.value === 'multiple' : true;
+        const optInputs = document.querySelectorAll('.poll-opt-input'); const options = []; optInputs.forEach(input => { const val = input.value.trim(); if(val) options.push({ name: val, voters: [] }); });
+        if(!title || options.length < 2) return showCustomDialog("請輸入問題，並至少填寫兩個選項！"); 
+        withLoader(() => {
+            const p = getCurProject(); if(!p.polls) p.polls=[]; 
+            let isNew = false;
+            if(editId) { const idx = p.polls.findIndex(x => x.id == editId); if(idx > -1) { const oldOptions = p.polls[idx].options; options.forEach(newOpt => { const matchedOld = oldOptions.find(o => o.name === newOpt.name); if(matchedOld) newOpt.voters = matchedOld.voters; }); p.polls[idx].title = title; p.polls[idx].date = pollDate; p.polls[idx].isMultipleChoice = isMultipleChoice; p.polls[idx].options = options; } cancelEditPoll(); showSync("✅ 投票已更新", 1500); } 
+            else { p.polls.push({ id: Date.now(), title, date: pollDate, isMultipleChoice, creator: currentUser, options }); isNew = true; } 
+            updateCurProject(p); renderPolls(); const formCard = document.getElementById('poll-form-card'); if(formCard) formCard.style.display = 'none'; const btn = document.getElementById('show-poll-btn'); if(btn) btn.style.display = 'block'; 
 
-            if (isNew) {
-                const tripName = p.location || "旅程";
-                const dateStr = pollDate ? ` (截止日: ${pollDate})` : '';
-                sendAutoLineNotification(`🗳️【${tripName}】新投票發布！\n\n[${currentUser}] 發起了一個新投票：「${title}」${dateStr}！\n快點進網頁投下神聖的一票吧！`);
-            }
-        });
-    }
-    
-    function editPoll(id) { const p = getCurProject(); const poll = p.polls.find(x => x.id === id); if(!poll) return; const titleInput = document.getElementById('poll-title'); if(titleInput) titleInput.value = poll.title; const idInput = document.getElementById('edit-poll-id'); if(idInput) idInput.value = poll.id; const dateInput = document.getElementById('poll-date'); if(dateInput) dateInput.value = poll.date || ''; const typeSel = document.getElementById('poll-type'); if(typeSel) typeSel.value = poll.isMultipleChoice === false ? 'single' : 'multiple'; const container = document.getElementById('poll-options-container'); if(container) container.innerHTML = ''; poll.options.forEach(opt => addPollOptionField(opt.name)); const titleEl = document.getElementById('poll-form-title'); if(titleEl) titleEl.innerHTML = "✏️ 編輯投票"; const btnEl = document.getElementById('save-poll-btn'); if(btnEl) btnEl.innerHTML = "更新"; const cancelBtn = document.getElementById('cancel-poll-btn'); if(cancelBtn) cancelBtn.style.display = "block"; const cardEl = document.getElementById('poll-form-card'); if(cardEl) { cardEl.classList.add('edit-mode-active'); cardEl.style.display = 'block'; } const showBtn = document.getElementById('show-poll-btn'); if(showBtn) showBtn.style.display = 'none'; const tabEl = document.getElementById('tab-more'); if(tabEl) tabEl.scrollIntoView({behavior: "smooth"}); }
-    
-    function cancelEditPoll() { const titleInput = document.getElementById('poll-title'); if(titleInput) titleInput.value = ''; const idInput = document.getElementById('edit-poll-id'); if(idInput) idInput.value = ''; const dateInput = document.getElementById('poll-date'); if(dateInput) dateInput.value = ''; const typeSel = document.getElementById('poll-type'); if(typeSel) typeSel.value = 'multiple'; const container = document.getElementById('poll-options-container'); if(container) container.innerHTML = `<div class="poll-opt-row"><input type="text" class="form-control poll-opt-input" style="margin:0;" placeholder="選項 1"></div><div class="poll-opt-row"><input type="text" class="form-control poll-opt-input" style="margin:0;" placeholder="選項 2"></div>`; const titleEl = document.getElementById('poll-form-title'); if(titleEl) titleEl.innerHTML = "建立投票"; const btnEl = document.getElementById('save-poll-btn'); if(btnEl) btnEl.innerHTML = "發布投票"; const cancelBtn = document.getElementById('cancel-poll-btn'); if(cancelBtn) cancelBtn.style.display = "none"; const cardEl = document.getElementById('poll-form-card'); if(cardEl) { cardEl.classList.remove('edit-mode-active'); cardEl.style.display='none'; } const showBtn = document.getElementById('show-poll-btn'); if(showBtn) showBtn.style.display='block'; }
-    
-    function delPoll(id) { showCustomDialog("確定刪除此投票？", true, () => { withLoader(() => { const p = getCurProject(); p.polls = p.polls.filter(x => x.id !== id); updateCurProject(p); renderPolls(); }); }); }
-    
-    function vote(pollId, optIdx) { 
-        const p = getCurProject(); if (p.status === 'archived') return; 
-        const poll = p.polls.find(x => x.id === pollId); const isMultipleChoice = poll.isMultipleChoice !== false; 
-        const opt = poll.options[optIdx]; const hasVotedThis = opt.voters.includes(currentUser);
-        if (isMultipleChoice) { if (hasVotedThis) opt.voters = opt.voters.filter(v => v !== currentUser); else opt.voters.push(currentUser); } 
-        else { if (hasVotedThis) opt.voters = opt.voters.filter(v => v !== currentUser); else { poll.options.forEach(o => { o.voters = o.voters.filter(v => v !== currentUser); }); opt.voters.push(currentUser); } }
-        updateCurProject(p); renderPolls(); 
-    }
+            if (isNew) {
+                const tripName = p.location || "旅程";
+                const dateStr = pollDate ? ` (截止日: ${pollDate})` : '';
+                sendAutoLineNotification(`🗳️【${tripName}】新投票發布！\n\n[${currentUser}] 發起了一個新投票：「${title}」${dateStr}！\n快點進網頁投下神聖的一票吧！`);
+            }
+        });
+    }
+    
+    function editPoll(id) { const p = getCurProject(); const poll = p.polls.find(x => x.id === id); if(!poll) return; const titleInput = document.getElementById('poll-title'); if(titleInput) titleInput.value = poll.title; const idInput = document.getElementById('edit-poll-id'); if(idInput) idInput.value = poll.id; const dateInput = document.getElementById('poll-date'); if(dateInput) dateInput.value = poll.date || ''; const typeSel = document.getElementById('poll-type'); if(typeSel) typeSel.value = poll.isMultipleChoice === false ? 'single' : 'multiple'; const container = document.getElementById('poll-options-container'); if(container) container.innerHTML = ''; poll.options.forEach(opt => addPollOptionField(opt.name)); const titleEl = document.getElementById('poll-form-title'); if(titleEl) titleEl.innerHTML = "✏️ 編輯投票"; const btnEl = document.getElementById('save-poll-btn'); if(btnEl) btnEl.innerHTML = "更新"; const cancelBtn = document.getElementById('cancel-poll-btn'); if(cancelBtn) cancelBtn.style.display = "block"; const cardEl = document.getElementById('poll-form-card'); if(cardEl) { cardEl.classList.add('edit-mode-active'); cardEl.style.display = 'block'; } const showBtn = document.getElementById('show-poll-btn'); if(showBtn) showBtn.style.display = 'none'; const tabEl = document.getElementById('tab-more'); if(tabEl) tabEl.scrollIntoView({behavior: "smooth"}); }
+    
+    function cancelEditPoll() { const titleInput = document.getElementById('poll-title'); if(titleInput) titleInput.value = ''; const idInput = document.getElementById('edit-poll-id'); if(idInput) idInput.value = ''; const dateInput = document.getElementById('poll-date'); if(dateInput) dateInput.value = ''; const typeSel = document.getElementById('poll-type'); if(typeSel) typeSel.value = 'multiple'; const container = document.getElementById('poll-options-container'); if(container) container.innerHTML = `<div class="poll-opt-row"><input type="text" class="form-control poll-opt-input" style="margin:0;" placeholder="選項 1"></div><div class="poll-opt-row"><input type="text" class="form-control poll-opt-input" style="margin:0;" placeholder="選項 2"></div>`; const titleEl = document.getElementById('poll-form-title'); if(titleEl) titleEl.innerHTML = "建立投票"; const btnEl = document.getElementById('save-poll-btn'); if(btnEl) btnEl.innerHTML = "發布投票"; const cancelBtn = document.getElementById('cancel-poll-btn'); if(cancelBtn) cancelBtn.style.display = "none"; const cardEl = document.getElementById('poll-form-card'); if(cardEl) { cardEl.classList.remove('edit-mode-active'); cardEl.style.display='none'; } const showBtn = document.getElementById('show-poll-btn'); if(showBtn) showBtn.style.display='block'; }
+    
+    function delPoll(id) { showCustomDialog("確定刪除此投票？", true, () => { withLoader(() => { const p = getCurProject(); p.polls = p.polls.filter(x => x.id !== id); updateCurProject(p); renderPolls(); }); }); }
+    
+    function vote(pollId, optIdx) { 
+        const p = getCurProject(); if (p.status === 'archived') return; 
+        const poll = p.polls.find(x => x.id === pollId); const isMultipleChoice = poll.isMultipleChoice !== false; 
+        const opt = poll.options[optIdx]; const hasVotedThis = opt.voters.includes(currentUser);
+        if (isMultipleChoice) { if (hasVotedThis) opt.voters = opt.voters.filter(v => v !== currentUser); else opt.voters.push(currentUser); } 
+        else { if (hasVotedThis) opt.voters = opt.voters.filter(v => v !== currentUser); else { poll.options.forEach(o => { o.voters = o.voters.filter(v => v !== currentUser); }); opt.voters.push(currentUser); } }
+        updateCurProject(p); renderPolls(); 
+    }
 
-    function renderChecklist() {
-        const p = getCurProject(); const list = document.getElementById('checklist-container'); const progText = document.getElementById('checklist-progress-text'); const progBar = document.getElementById('checklist-progress-bar');
-        if(!list) return;
-        if(!p.checklist || p.checklist.length === 0) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎒</div><div class="empty-state-text">還沒有建立待辦或行李清單</div></div>`; if(progText) progText.textContent = "0 / 0"; if(progBar) progBar.style.width = "0%"; return; }
-        const myDoneCount = p.checklist.filter(c => c.checkedBy && c.checkedBy.includes(currentUser)).length;
-        if(progText) progText.textContent = `${myDoneCount} / ${p.checklist.length}`; 
-        if(progBar) progBar.style.width = `${(myDoneCount / p.checklist.length) * 100}%`;
-        
-        list.innerHTML = p.checklist.map(c => {
-            const isMeDone = c.checkedBy && c.checkedBy.includes(currentUser); let whoCheckedText = '';
-            if(c.checkedBy && c.checkedBy.length > 0) whoCheckedText = `<div class="checked-by-tags">✅ ${c.checkedBy.join('、')} 已準備</div>`;
-            return `<div class="checklist-item" onclick="toggleChecklist(${c.id})"><div class="check-circle" style="${isMeDone ? 'background:var(--secondary); border-color:var(--secondary); color:white;' : ''}">${isMeDone ? '✓' : ''}</div><div style="flex:1;"><div class="checklist-text" style="${isMeDone ? 'text-decoration:line-through; color:var(--text-muted); opacity:0.6;' : ''}">${c.text}</div>${whoCheckedText}</div><span class="action-text del-text hide-in-archive" style="padding:4px 8px; margin:0;" onclick="delChecklist(${c.id}, event)">✕</span></div>`;
-        }).join('');
-    }
-    function addChecklistItem() { const input = document.getElementById('checklist-input'); const text = input ? input.value.trim() : ''; if(!text) return showCustomDialog("請輸入待辦事項！"); withLoader(() => { const p = getCurProject(); if(!p.checklist) p.checklist = []; p.checklist.push({ id: Date.now(), text: text, checkedBy: [] }); updateCurProject(p); if(input) input.value = ''; renderChecklist(); }); }
-    function toggleChecklist(id) { const p = getCurProject(); if (p.status === 'archived') return; const item = p.checklist.find(x => x.id === id); if(item) { if(!item.checkedBy) item.checkedBy = []; if(item.checkedBy.includes(currentUser)) item.checkedBy = item.checkedBy.filter(u => u !== currentUser); else item.checkedBy.push(currentUser); updateCurProject(p); renderChecklist(); } }
-    function delChecklist(id, e) { e.stopPropagation(); showCustomDialog("確定刪除此項目？", true, () => { withLoader(() => { const p = getCurProject(); p.checklist = p.checklist.filter(x => x.id !== id); updateCurProject(p); renderChecklist(); }); }); }
+    function renderChecklist() {
+        const p = getCurProject(); const list = document.getElementById('checklist-container'); const progText = document.getElementById('checklist-progress-text'); const progBar = document.getElementById('checklist-progress-bar');
+        if(!list) return;
+        if(!p.checklist || p.checklist.length === 0) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎒</div><div class="empty-state-text">還沒有建立待辦或行李清單</div></div>`; if(progText) progText.textContent = "0 / 0"; if(progBar) progBar.style.width = "0%"; return; }
+        const myDoneCount = p.checklist.filter(c => c.checkedBy && c.checkedBy.includes(currentUser)).length;
+        if(progText) progText.textContent = `${myDoneCount} / ${p.checklist.length}`; 
+        if(progBar) progBar.style.width = `${(myDoneCount / p.checklist.length) * 100}%`;
+        
+        list.innerHTML = p.checklist.map(c => {
+            const isMeDone = c.checkedBy && c.checkedBy.includes(currentUser); let whoCheckedText = '';
+            if(c.checkedBy && c.checkedBy.length > 0) whoCheckedText = `<div class="checked-by-tags">✅ ${c.checkedBy.join('、')} 已準備</div>`;
+            return `<div class="checklist-item" onclick="toggleChecklist(${c.id})"><div class="check-circle" style="${isMeDone ? 'background:var(--secondary); border-color:var(--secondary); color:white;' : ''}">${isMeDone ? '✓' : ''}</div><div style="flex:1;"><div class="checklist-text" style="${isMeDone ? 'text-decoration:line-through; color:var(--text-muted); opacity:0.6;' : ''}">${c.text}</div>${whoCheckedText}</div><span class="action-text del-text hide-in-archive" style="padding:4px 8px; margin:0;" onclick="delChecklist(${c.id}, event)">✕</span></div>`;
+        }).join('');
+    }
+    function addChecklistItem() { const input = document.getElementById('checklist-input'); const text = input ? input.value.trim() : ''; if(!text) return showCustomDialog("請輸入待辦事項！"); withLoader(() => { const p = getCurProject(); if(!p.checklist) p.checklist = []; p.checklist.push({ id: Date.now(), text: text, checkedBy: [] }); updateCurProject(p); if(input) input.value = ''; renderChecklist(); }); }
+    function toggleChecklist(id) { const p = getCurProject(); if (p.status === 'archived') return; const item = p.checklist.find(x => x.id === id); if(item) { if(!item.checkedBy) item.checkedBy = []; if(item.checkedBy.includes(currentUser)) item.checkedBy = item.checkedBy.filter(u => u !== currentUser); else item.checkedBy.push(currentUser); updateCurProject(p); renderChecklist(); } }
+    function delChecklist(id, e) { e.stopPropagation(); showCustomDialog("確定刪除此項目？", true, () => { withLoader(() => { const p = getCurProject(); p.checklist = p.checklist.filter(x => x.id !== id); updateCurProject(p); renderChecklist(); }); }); }
 
-    // --- 🌐 eSIM / 網卡管理模組 ---
-    function previewEsimImage(event) {
-        const file = event.target.files[0]; 
-        if(!file) return; 
-        const reader = new FileReader();
-        
-        reader.onload = (e) => {
-            const img = new Image(); 
-            img.onload = () => {
-                const canvas = document.createElement('canvas'); 
-                const MAX_WIDTH = 800; 
-                let width = img.width; 
-                let height = img.height; 
-                if (width > MAX_WIDTH) { 
-                    height *= MAX_WIDTH / width; 
-                    width = MAX_WIDTH; 
-                }
-                canvas.width = width; 
-                canvas.height = height; 
-                const ctx = canvas.getContext('2d'); 
-                ctx.drawImage(img, 0, 0, width, height); 
-                const compressed = canvas.toDataURL('image/jpeg', 0.7); 
-                document.getElementById('esim-image-input').dataset.base64 = compressed;
-                const preview = document.getElementById('esim-img-preview'); 
-                preview.src = compressed; 
-                preview.style.display = 'block';
-            }; 
-            img.src = e.target.result;
-        }; 
-        reader.readAsDataURL(file);
-    }
-    
-    function addEsim() {
-        const assignee = document.getElementById('esim-assignee').value; 
-        const name = document.getElementById('esim-name').value.trim();
-        const smdp = document.getElementById('esim-smdp').value.trim();
-        const activation = document.getElementById('esim-activation').value.trim();
-        const imgInput = document.getElementById('esim-image-input');
-        const imgBase64 = imgInput.dataset.base64 || null;
-        
-        if(!name) return showCustomDialog("請輸入網卡名稱！");
-        if(!smdp && !activation && !imgBase64) return showCustomDialog("請至少提供一種安裝方式 (代碼或 QRCode 圖片)！");
+    // --- 🌐 eSIM / 網卡管理模組 ---
+    function previewEsimImage(event) {
+        const file = event.target.files[0]; 
+        if(!file) return; 
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            const img = new Image(); 
+            img.onload = () => {
+                const canvas = document.createElement('canvas'); 
+                const MAX_WIDTH = 800; 
+                let width = img.width; 
+                let height = img.height; 
+                if (width > MAX_WIDTH) { 
+                    height *= MAX_WIDTH / width; 
+                    width = MAX_WIDTH; 
+                }
+                canvas.width = width; 
+                canvas.height = height; 
+                const ctx = canvas.getContext('2d'); 
+                ctx.drawImage(img, 0, 0, width, height); 
+                const compressed = canvas.toDataURL('image/jpeg', 0.7); 
+                document.getElementById('esim-image-input').dataset.base64 = compressed;
+                const preview = document.getElementById('esim-img-preview'); 
+                preview.src = compressed; 
+                preview.style.display = 'block';
+            }; 
+            img.src = e.target.result;
+        }; 
+        reader.readAsDataURL(file);
+    }
+    
+    function addEsim() {
+        const assignee = document.getElementById('esim-assignee').value; 
+        const name = document.getElementById('esim-name').value.trim();
+        const smdp = document.getElementById('esim-smdp').value.trim();
+        const activation = document.getElementById('esim-activation').value.trim();
+        const imgInput = document.getElementById('esim-image-input');
+        const imgBase64 = imgInput.dataset.base64 || null;
+        
+        if(!name) return showCustomDialog("請輸入網卡名稱！");
+        if(!smdp && !activation && !imgBase64) return showCustomDialog("請至少提供一種安裝方式 (代碼或 QRCode 圖片)！");
 
-        withLoader(() => {
-            const p = getCurProject(); 
-            if(!p.esims) p.esims = [];
-            p.esims.push({ id: Date.now(), name, smdp, activation, image: imgBase64, creator: currentUser, assignee: assignee, activatedBy: [] });
-            updateCurProject(p);
-            
-            document.getElementById('esim-name').value = ''; 
-            document.getElementById('esim-smdp').value = ''; 
-            document.getElementById('esim-activation').value = ''; 
-            document.getElementById('esim-assignee').value = '';
-            imgInput.value = ''; 
-            delete imgInput.dataset.base64; 
-            document.getElementById('esim-img-preview').style.display = 'none';
-            renderEsims(); 
-            showSync("✅ eSIM 資訊已分享！", 1500);
+        withLoader(() => {
+            const p = getCurProject(); 
+            if(!p.esims) p.esims = [];
+            p.esims.push({ id: Date.now(), name, smdp, activation, image: imgBase64, creator: currentUser, assignee: assignee, activatedBy: [] });
+            updateCurProject(p);
+            
+            document.getElementById('esim-name').value = ''; 
+            document.getElementById('esim-smdp').value = ''; 
+            document.getElementById('esim-activation').value = ''; 
+            document.getElementById('esim-assignee').value = '';
+            imgInput.value = ''; 
+            delete imgInput.dataset.base64; 
+            document.getElementById('esim-img-preview').style.display = 'none';
+            renderEsims(); 
+            showSync("✅ eSIM 資訊已分享！", 1500);
 
-            const tripName = p.location || "旅程";
-            const assignText = assignee ? `指定給：[${assignee}]` : `開放給所有人`;
-            sendAutoLineNotification(`🌐【${tripName}】網卡資訊來囉！\n\n[${currentUser}] 剛剛分享了一張「${name}」的網卡，${assignText}。\n快去網頁的「更多->網卡」掃描 QRCode 開通吧！`);
-        });
-    }
+            const tripName = p.location || "旅程";
+            const assignText = assignee ? `指定給：[${assignee}]` : `開放給所有人`;
+            sendAutoLineNotification(`🌐【${tripName}】網卡資訊來囉！\n\n[${currentUser}] 剛剛分享了一張「${name}」的網卡，${assignText}。\n快去網頁的「更多->網卡」掃描 QRCode 開通吧！`);
+        });
+    }
 
-    function renderEsims() {
-        const p = getCurProject(); 
-        const list = document.getElementById('esim-list'); 
-        if(!list) return;
-        
-        if(!p.esims || p.esims.length === 0) { 
-            list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🌐</div><div class="empty-state-text">還沒有人分享網卡資訊喔！</div></div>`; 
-            return; 
-        }
-        
-        let html = '';
-        p.esims.forEach(e => {
-            const isActivated = e.activatedBy && e.activatedBy.includes(currentUser);
-            const activatedText = e.activatedBy && e.activatedBy.length > 0 ? `<div style="font-size:11px; color:var(--secondary); background:#E6FAF8; padding:4px 8px; border-radius:8px; font-weight:bold; margin-top:8px;">✅ 已開通成員: ${e.activatedBy.join(', ')}</div>` : '';
-            
-            let assignBadge = '';
-            let opacityStyle = '';
-            if (e.assignee) {
-                if (e.assignee === currentUser) {
-                    assignBadge = `<div style="background:var(--primary); color:white; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:bold; margin-bottom:12px; display:inline-block;">🎯 這是專屬於你的網卡</div>`;
-                } else {
-                    assignBadge = `<div style="background:#E2E8F0; color:var(--text-muted); padding:4px 10px; border-radius:8px; font-size:11px; font-weight:bold; margin-bottom:12px; display:inline-block;">🔒 指定給：${e.assignee} (請勿誤用)</div>`;
-                    opacityStyle = 'opacity: 0.55;'; 
-                }
-            }
+    function renderEsims() {
+        const p = getCurProject(); 
+        const list = document.getElementById('esim-list'); 
+        if(!list) return;
+        
+        if(!p.esims || p.esims.length === 0) { 
+            list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🌐</div><div class="empty-state-text">還沒有人分享網卡資訊喔！</div></div>`; 
+            return; 
+        }
+        
+        let html = '';
+        p.esims.forEach(e => {
+            const isActivated = e.activatedBy && e.activatedBy.includes(currentUser);
+            const activatedText = e.activatedBy && e.activatedBy.length > 0 ? `<div style="font-size:11px; color:var(--secondary); background:#E6FAF8; padding:4px 8px; border-radius:8px; font-weight:bold; margin-top:8px;">✅ 已開通成員: ${e.activatedBy.join(', ')}</div>` : '';
+            
+            let assignBadge = '';
+            let opacityStyle = '';
+            if (e.assignee) {
+                if (e.assignee === currentUser) {
+                    assignBadge = `<div style="background:var(--primary); color:white; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:bold; margin-bottom:12px; display:inline-block;">🎯 這是專屬於你的網卡</div>`;
+                } else {
+                    assignBadge = `<div style="background:#E2E8F0; color:var(--text-muted); padding:4px 10px; border-radius:8px; font-size:11px; font-weight:bold; margin-bottom:12px; display:inline-block;">🔒 指定給：${e.assignee} (請勿誤用)</div>`;
+                    opacityStyle = 'opacity: 0.55;'; 
+                }
+            }
 
-            html += `
-            <div class="esim-card" style="${opacityStyle}">
-                ${assignBadge}
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <strong style="font-size:18px; color:var(--text-main);">${e.name}</strong>
-                    <span class="action-text del-text hide-in-archive" style="margin:0;" onclick="delEsim(${e.id})">✕</span>
-                </div>
-                <div style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">由 ${e.creator} 分享</div>
-                
-                ${e.image ? `<div style="text-align:center; margin-bottom:12px;"><img src="${e.image}" style="max-width:100%; border-radius:12px; border:1px solid #E4E8ED; cursor:pointer;" onclick="window.open('${e.image}')"><div style="font-size:11px; color:#888; margin-top:4px;">👆 點擊圖片可放大掃描</div></div>` : ''}
-                
-                ${e.smdp ? `<div style="font-size:12px; font-weight:bold; color:var(--text-muted);">SM-DP+ Address:</div><div class="esim-code-box" onclick="copyText('${e.smdp}', '📋 SM-DP+ 已複製')">${e.smdp}</div>` : ''}
-                ${e.activation ? `<div style="font-size:12px; font-weight:bold; color:var(--text-muted); margin-top:8px;">Activation Code:</div><div class="esim-code-box" onclick="copyText('${e.activation}', '📋 Activation Code 已複製')">${e.activation}</div>` : ''}
-                
-                <button class="btn ${isActivated ? 'btn-outline' : 'btn-action'}" style="width:100%; margin-top:12px; font-size:14px; padding:10px;" onclick="toggleEsimStatus(${e.id})">
-                    ${isActivated ? '取消開通標記' : '我已完成開通 🙌'}
-                </button>
-                ${activatedText}
-            </div>`;
-        });
-        list.innerHTML = html;
-    }
+            html += `
+            <div class="esim-card" style="${opacityStyle}">
+                ${assignBadge}
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <strong style="font-size:18px; color:var(--text-main);">${e.name}</strong>
+                    <span class="action-text del-text hide-in-archive" style="margin:0;" onclick="delEsim(${e.id})">✕</span>
+                </div>
+                <div style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">由 ${e.creator} 分享</div>
+                
+                ${e.image ? `<div style="text-align:center; margin-bottom:12px;"><img src="${e.image}" style="max-width:100%; border-radius:12px; border:1px solid #E4E8ED; cursor:pointer;" onclick="window.open('${e.image}')"><div style="font-size:11px; color:#888; margin-top:4px;">👆 點擊圖片可放大掃描</div></div>` : ''}
+                
+                ${e.smdp ? `<div style="font-size:12px; font-weight:bold; color:var(--text-muted);">SM-DP+ Address:</div><div class="esim-code-box" onclick="copyText('${e.smdp}', '📋 SM-DP+ 已複製')">${e.smdp}</div>` : ''}
+                ${e.activation ? `<div style="font-size:12px; font-weight:bold; color:var(--text-muted); margin-top:8px;">Activation Code:</div><div class="esim-code-box" onclick="copyText('${e.activation}', '📋 Activation Code 已複製')">${e.activation}</div>` : ''}
+                
+                <button class="btn ${isActivated ? 'btn-outline' : 'btn-action'}" style="width:100%; margin-top:12px; font-size:14px; padding:10px;" onclick="toggleEsimStatus(${e.id})">
+                    ${isActivated ? '取消開通標記' : '我已完成開通 🙌'}
+                </button>
+                ${activatedText}
+            </div>`;
+        });
+        list.innerHTML = html;
+    }
 
-    function toggleEsimStatus(id) {
-        withLoader(() => {
-            const p = getCurProject(); 
-            const esim = p.esims.find(x => x.id === id); 
-            if(!esim) return;
-            
-            if(!esim.activatedBy) esim.activatedBy = [];
-            
-            if(esim.activatedBy.includes(currentUser)) {
-                esim.activatedBy = esim.activatedBy.filter(u => u !== currentUser);
-            } else {
-                esim.activatedBy.push(currentUser);
-            }
-            
-            updateCurProject(p); 
-            renderEsims();
-        }, 200);
-    }
-    
-    function delEsim(id) { 
-        showCustomDialog("確定刪除此網卡資訊？", true, () => { 
-            withLoader(() => { 
-                const p = getCurProject(); 
-                p.esims = p.esims.filter(x => x.id !== id); 
-                updateCurProject(p); 
-                renderEsims(); 
-            }); 
-        }); 
-    }
+    function toggleEsimStatus(id) {
+        withLoader(() => {
+            const p = getCurProject(); 
+            const esim = p.esims.find(x => x.id === id); 
+            if(!esim) return;
+            
+            if(!esim.activatedBy) esim.activatedBy = [];
+            
+            if(esim.activatedBy.includes(currentUser)) {
+                esim.activatedBy = esim.activatedBy.filter(u => u !== currentUser);
+            } else {
+                esim.activatedBy.push(currentUser);
+            }
+            
+            updateCurProject(p); 
+            renderEsims();
+        }, 200);
+    }
+    
+    function delEsim(id) { 
+        showCustomDialog("確定刪除此網卡資訊？", true, () => { 
+            withLoader(() => { 
+                const p = getCurProject(); 
+                p.esims = p.esims.filter(x => x.id !== id); 
+                updateCurProject(p); 
+                renderEsims(); 
+            }); 
+        }); 
+    }
 
-  </script>
+  </script>
 </body>
 </html>
