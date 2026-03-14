@@ -1075,7 +1075,7 @@
             if (isManual) showCustomDialog("⚠️ 尚未綁定群組！<br><br>請先完成上方步驟，並將機器人回覆的「群組 ID」貼到欄位中儲存。");
             return; 
         }
-        const finalMessage = message + "\n\n🔗 點此開啟驢遊趣：\nhttps://您的新GitHub帳號.github.io/travel/";
+        const finalMessage = message + "\n\n🔗 點此開啟驢遊趣：\nhttps://minhsuan721.github.io/DonkeyTravel/";
         
         fetch(`${LINE_GAS_WEBHOOK_URL}?action=sendPush&groupId=${p.lineGroupId}&message=${encodeURIComponent(finalMessage)}`, { mode: 'no-cors' })
         .then(() => { if(isManual) showSync("✅ 通知請求已送出！請查看 LINE", 2000); })
