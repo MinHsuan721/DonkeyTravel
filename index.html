@@ -1188,8 +1188,8 @@
             // 1. 同步帳號密碼名單
             const userDoc = await fsDb.collection('workspaces').doc(`${currentWorkspace}_users`).get();
             if(userDoc.exists && userDoc.data().data) {
-                const newUsersData = JSON.parse(userDoc.data().data);
-                customUsers = { ...baseAuthRules, ...customUsers, ...newUsersData };
+               const newUsersData = JSON.parse(userDoc.data().data);
+                customUsers = { ...newUsersData }; // 完全覆蓋為 Firebase 上的最新名單
                 authRules = { ...customUsers }; allMembers = Object.keys(authRules);
                 localStorage.setItem(`app_users_${currentWorkspace}`, JSON.stringify(customUsers));
                 if (document.getElementById('user-select') && !currentUser) renderUserSelect();
@@ -1256,8 +1256,12 @@
         let raw = localStorage.getItem(`app_${currentWorkspace}`) || '[]'; let db = []; 
         try { db = JSON.parse(raw); if (!Array.isArray(db)) db = []; } catch(e) { db = []; }
         let updated = false; db = db.filter(p => p !== null && typeof p === 'object');
-        db.forEach(p => {
-            if(!p.members || !Array.isArray(p.members) || p.members.length === 0) { p.members = ['魏嘉宏', '魏卉姍', '魏敏軒', '魏珮芯', '陳筱雙']; updated = true; }
+       db.forEach(p => {
+            if(!p.members || !Array.isArray(p.members) || p.members.length === 0) {
+                p.members = allMembers.length > 0 ? [...allMembers] : [];
+                updated = true;
+            }
+        });
             if(!p.status) { p.status = 'active'; updated = true; } if(!p.wishlist) { p.wishlist = []; updated = true; } if(!p.duties) { p.duties = {}; updated = true; } if(!p.repayments) { p.repayments = []; updated = true; }
             if(!p.exchangeRates || typeof p.exchangeRates !== 'object' || p.exchangeRates.currency) { p.exchangeRates = { ...defaultExchangeRates }; updated = true; }
             if(!p.activeCurrencies || !Array.isArray(p.activeCurrencies)) { p.activeCurrencies = ['JPY']; updated = true; }
@@ -1385,7 +1389,7 @@
         fsDb.collection('workspaces').doc(`${currentWorkspace}_users`).get().then(doc => {
             if (doc.exists && doc.data().data) { 
                 const newUsersData = JSON.parse(doc.data().data);
-                customUsers = { ...baseAuthRules, ...customUsers, ...newUsersData }; authRules = { ...customUsers }; allMembers = Object.keys(authRules); localStorage.setItem(`app_users_${currentWorkspace}`, JSON.stringify(customUsers)); if (!currentUser) renderUserSelect(); 
+                customUsers = { ...newUsersData }; authRules = { ...customUsers }; allMembers = Object.keys(authRules); localStorage.setItem(`app_users_${currentWorkspace}`, JSON.stringify(customUsers)); if (!currentUser) renderUserSelect();
             }
         }).catch(() => {});
 
