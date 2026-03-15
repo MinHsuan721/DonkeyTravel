@@ -2716,10 +2716,11 @@
         updateCurProject(p); renderPolls(); 
     }
 
-    function renderChecklist() {
+   function renderChecklist() {
         const p = getCurProject(); const list = document.getElementById('checklist-container'); const progText = document.getElementById('checklist-progress-text'); const progBar = document.getElementById('checklist-progress-bar');
         if(!list) return;
         if(!p.checklist || p.checklist.length === 0) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎒</div><div class="empty-state-text">還沒有建立待辦或行李清單</div></div>`; if(progText) progText.textContent = "0 / 0"; if(progBar) progBar.style.width = "0%"; return; }
+        
         const myDoneCount = p.checklist.filter(c => c.checkedBy && c.checkedBy.includes(currentUser)).length;
         if(progText) progText.textContent = `${myDoneCount} / ${p.checklist.length}`; 
         if(progBar) progBar.style.width = `${(myDoneCount / p.checklist.length) * 100}%`;
@@ -2727,12 +2728,55 @@
         list.innerHTML = p.checklist.map(c => {
             const isMeDone = c.checkedBy && c.checkedBy.includes(currentUser); let whoCheckedText = '';
             if(c.checkedBy && c.checkedBy.length > 0) whoCheckedText = `<div class="checked-by-tags">✅ ${c.checkedBy.join('、')} 已準備</div>`;
-            return `<div class="checklist-item" onclick="toggleChecklist(${c.id})"><div class="check-circle" style="${isMeDone ? 'background:var(--secondary); border-color:var(--secondary); color:white;' : ''}">${isMeDone ? '✓' : ''}</div><div style="flex:1;"><div class="checklist-text" style="${isMeDone ? 'text-decoration:line-through; color:var(--text-muted); opacity:0.6;' : ''}">${c.text}</div>${whoCheckedText}</div><span class="action-text del-text hide-in-archive" style="padding:4px 8px; margin:0;" onclick="delChecklist(${c.id}, event)">✕</span></div>`;
+            return `
+            <div class="checklist-item" data-id="${c.id}" style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border);">
+                <div class="drag-handle-check hide-in-archive" style="color:#CBD5E1; cursor:grab; font-size:20px; padding-left:4px; padding-right:4px;">☰</div>
+                <div class="check-circle" onclick="toggleChecklist(${c.id})" style="${isMeDone ? 'background:var(--secondary); border-color:var(--secondary); color:white;' : ''} cursor:pointer;">${isMeDone ? '✓' : ''}</div>
+                <div style="flex:1; cursor:pointer;" onclick="toggleChecklist(${c.id})">
+                    <div class="checklist-text" style="${isMeDone ? 'text-decoration:line-through; color:var(--text-muted); opacity:0.6;' : ''}">${c.text}</div>
+                    ${whoCheckedText}
+                </div>
+                <span class="action-text edit-text hide-in-archive" style="padding:4px 8px; margin:0;" onclick="editChecklist(${c.id}, event)">✏️</span>
+                <span class="action-text del-text hide-in-archive" style="padding:4px 8px; margin:0;" onclick="delChecklist(${c.id}, event)">✕</span>
+            </div>`;
         }).join('');
+
+        // 加入 SortableJS 拖曳功能
+        if(p.status !== 'archived' && typeof Sortable !== 'undefined') {
+            if(window.checklistSortable) window.checklistSortable.destroy();
+            window.checklistSortable = new Sortable(list, {
+                handle: '.drag-handle-check', animation: 150, delay: 150, delayOnTouchOnly: true, ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    if (evt.oldIndex === evt.newIndex) return;
+                    withLoader(() => {
+                        const curP = getCurProject();
+                        const movedItem = curP.checklist.splice(evt.oldIndex, 1)[0];
+                        curP.checklist.splice(evt.newIndex, 0, movedItem);
+                        updateCurProject(curP);
+                        renderChecklist();
+                    }, 100);
+                }
+            });
+        }
     }
-    function addChecklistItem() { const input = document.getElementById('checklist-input'); const text = input ? input.value.trim() : ''; if(!text) return showCustomDialog("請輸入待辦事項！"); withLoader(() => { const p = getCurProject(); if(!p.checklist) p.checklist = []; p.checklist.push({ id: Date.now(), text: text, checkedBy: [] }); updateCurProject(p); if(input) input.value = ''; renderChecklist(); }); }
-    function toggleChecklist(id) { const p = getCurProject(); if (p.status === 'archived') return; const item = p.checklist.find(x => x.id === id); if(item) { if(!item.checkedBy) item.checkedBy = []; if(item.checkedBy.includes(currentUser)) item.checkedBy = item.checkedBy.filter(u => u !== currentUser); else item.checkedBy.push(currentUser); updateCurProject(p); renderChecklist(); } }
-    function delChecklist(id, e) { e.stopPropagation(); showCustomDialog("確定刪除此項目？", true, () => { withLoader(() => { const p = getCurProject(); p.checklist = p.checklist.filter(x => x.id !== id); updateCurProject(p); renderChecklist(); }); }); }
+
+    function editChecklist(id, e) {
+        e.stopPropagation();
+        const p = getCurProject(); 
+        const item = p.checklist.find(x => x.id === id); 
+        if(!item) return;
+        
+        // 彈出視窗讓使用者修改名稱
+        const newText = prompt("✏️ 請修改待辦/行李名稱：", item.text);
+        if(newText !== null && newText.trim() !== '') {
+            withLoader(() => {
+                item.text = newText.trim();
+                updateCurProject(p);
+                renderChecklist();
+                showSync("✅ 項目已更新", 1500);
+            });
+        }
+    }
 
     // --- 🌐 eSIM / 網卡管理模組 ---
     function previewEsimImage(event) {
