@@ -1700,30 +1700,41 @@
         });
       }
       
-    // ------ 產生 住宿 / 待排 / 新增 按鈕 ------
+    // ------ 產生 住宿 / 待排 / 新增 按鈕 (修正跑版) ------
       const todaysDuty = (p.duties && p.duties[activeDayIndex]) ? p.duties[activeDayIndex] : { driver: '', guide: '', hotel: '' };
       const hotelName = todaysDuty.hotel || '';
       
       let hotelBtnHtml = '';
       if (hotelName) {
           hotelBtnHtml = `
-          <div style="display:flex; align-items:center; background:#FFFDE7; border:1px solid #FDE047; border-radius:10px; padding:2px 4px 2px 10px;">
-              <span style="color:#B45309; font-weight:800; font-size:12px; cursor:pointer; max-width: 95px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="handleHotelAction('${hotelName.replace(/'/g, "\\'")}')" title="點擊導航與複製">🏨 ${hotelName}</span>
+          <div style="display:flex; align-items:center; background:#FFFDE7; border:1px solid #FDE047; border-radius:10px; padding:2px 4px 2px 10px; flex-shrink: 0;">
+              <span style="color:#B45309; font-weight:800; font-size:12px; cursor:pointer; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="handleHotelAction('${hotelName.replace(/'/g, "\\'")}')" title="點擊導航與複製">🏨 ${hotelName}</span>
               <span style="cursor:pointer; padding:4px; font-size:12px; margin-left:4px; border-left:1px solid #FDE047;" onclick="setDailyHotel()" title="修改住宿">✏️</span>
           </div>`;
       } else {
-          hotelBtnHtml = `<button class="btn-small" style="background:#F8F9FA; color:var(--text-muted); font-weight:800; border:1px dashed #CBD5E1; border-radius:10px; padding:6px 10px; font-size:12px; box-shadow:none; cursor:pointer; display:inline-flex; align-items:center;" onclick="setDailyHotel()">🏨 住宿</button>`;
+          hotelBtnHtml = `<button class="btn-small" style="background:#F8F9FA; color:var(--text-muted); font-weight:800; border:1px dashed #CBD5E1; border-radius:10px; padding:6px 10px; font-size:12px; box-shadow:none; cursor:pointer; display:inline-flex; align-items:center; flex-shrink: 0;" onclick="setDailyHotel()">🏨 住宿</button>`;
       }
 
       const headerBtns = document.getElementById('itinerary-header-actions');
       if (headerBtns) {
           headerBtns.innerHTML = `
               ${hotelBtnHtml}
-              <button class="btn-small" style="background:#F8FAFC; color:var(--secondary); font-weight:800; border:1px solid #CBD5E1; border-radius:10px; padding:6px 10px; font-size:12px; box-shadow:none; cursor:pointer; display:inline-flex; align-items:center; position: relative;" onclick="openWishlistModal()">🎒 待排 ${wishlistBadge}</button>
-              <button class="btn-small" style="background:var(--primary); color:white; font-weight:800; border:none; display:inline-flex; align-items:center; gap:4px; padding:6px 12px; border-radius:10px; cursor:pointer; box-shadow: 0 2px 8px rgba(255,90,95,0.3);" onclick="showAddPlanForm()"><span style="font-size:14px; margin-right:2px; line-height:1;">+</span> 新增</button>
+              <button class="btn-small" style="background:#F8FAFC; color:var(--secondary); font-weight:800; border:1px solid #CBD5E1; border-radius:10px; padding:6px 10px; font-size:12px; box-shadow:none; cursor:pointer; display:inline-flex; align-items:center; position: relative; flex-shrink: 0;" onclick="openWishlistModal()">🎒 待排 ${wishlistBadge}</button>
+              <button class="btn-small" style="background:var(--primary); color:white; font-weight:800; border:none; display:inline-flex; align-items:center; gap:4px; padding:6px 12px; border-radius:10px; cursor:pointer; box-shadow: 0 2px 8px rgba(255,90,95,0.3); flex-shrink: 0;" onclick="showAddPlanForm()"><span style="font-size:14px; margin-right:2px; line-height:1;">+</span> 新增</button>
           `;
-          headerBtns.style.flexWrap = 'wrap';
+          
+          // 修正跑版邏輯：強制讓按鈕列獨立成一排，對齊右邊
+          const dateHeader = document.querySelector('.itinerary-date-header');
+          if (dateHeader) {
+              dateHeader.style.flexWrap = 'wrap';
+          }
+          headerBtns.style.width = '100%';
+          headerBtns.style.marginTop = '4px';
+          headerBtns.style.flexWrap = 'nowrap';
           headerBtns.style.justifyContent = 'flex-end';
+          headerBtns.style.overflowX = 'auto'; // 允許橫向微滑動，防止螢幕過小變形
+          headerBtns.style.paddingBottom = '4px'; // 預留給按鈕陰影的空間
+          headerBtns.style.scrollbarWidth = 'none'; // 隱藏滾動條美化
       }
 
       const dutyDriverEl = document.getElementById('duty-driver'); if (dutyDriverEl) dutyDriverEl.value = todaysDuty.driver || '';
