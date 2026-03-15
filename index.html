@@ -2825,7 +2825,7 @@ function switchTab(tabId) {
         updateCurProject(p); renderPolls(); 
     }
 
-   function renderChecklist() {
+function renderChecklist() {
         const p = getCurProject(); const list = document.getElementById('checklist-container'); const progText = document.getElementById('checklist-progress-text'); const progBar = document.getElementById('checklist-progress-bar');
         if(!list) return;
         if(!p.checklist || p.checklist.length === 0) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎒</div><div class="empty-state-text">還沒有建立待辦或行李清單</div></div>`; if(progText) progText.textContent = "0 / 0"; if(progBar) progBar.style.width = "0%"; return; }
@@ -2874,8 +2874,6 @@ function switchTab(tabId) {
         const p = getCurProject(); 
         const item = p.checklist.find(x => x.id === id); 
         if(!item) return;
-        
-        // 彈出視窗讓使用者修改名稱
         const newText = prompt("✏️ 請修改待辦/行李名稱：", item.text);
         if(newText !== null && newText.trim() !== '') {
             withLoader(() => {
@@ -2886,6 +2884,11 @@ function switchTab(tabId) {
             });
         }
     }
+
+    // 👇 這三個是被誤刪除的救命函數，已經幫你補回來了！
+    function addChecklistItem() { const input = document.getElementById('checklist-input'); const text = input ? input.value.trim() : ''; if(!text) return showCustomDialog("請輸入待辦事項！"); withLoader(() => { const p = getCurProject(); if(!p.checklist) p.checklist = []; p.checklist.push({ id: Date.now(), text: text, checkedBy: [] }); updateCurProject(p); if(input) input.value = ''; renderChecklist(); }); }
+    function toggleChecklist(id) { const p = getCurProject(); if (p.status === 'archived') return; const item = p.checklist.find(x => x.id === id); if(item) { if(!item.checkedBy) item.checkedBy = []; if(item.checkedBy.includes(currentUser)) item.checkedBy = item.checkedBy.filter(u => u !== currentUser); else item.checkedBy.push(currentUser); updateCurProject(p); renderChecklist(); } }
+    function delChecklist(id, e) { e.stopPropagation(); showCustomDialog("確定刪除此項目？", true, () => { withLoader(() => { const p = getCurProject(); p.checklist = p.checklist.filter(x => x.id !== id); updateCurProject(p); renderChecklist(); }); }); }
 
     // --- 🌐 eSIM / 網卡管理模組 ---
     function previewEsimImage(event) {
