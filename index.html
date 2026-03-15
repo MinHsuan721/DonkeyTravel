@@ -1404,7 +1404,7 @@
     
     function switchView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); const el = document.getElementById(id); if(el) el.classList.add('active'); }
     
-    function switchTab(tabId) { 
+function switchTab(tabId) { 
         document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active')); 
         const targetNav = Array.from(document.querySelectorAll('.nav-item')).find(t => t.getAttribute('onclick') && t.getAttribute('onclick').includes(tabId));
         if(targetNav) targetNav.classList.add('active');
@@ -1416,12 +1416,13 @@
         localStorage.setItem('app_lastTab', tabId); 
         if (tabId === 'map') { setTimeout(() => { initMap(); renderMapRoute(); }, 100); }
         
+        // 🚨 已移除危險的 saveDB，改為只存在本地，防止切換頁籤時舊資料意外覆蓋雲端
         if (currentProjectId) {
             const db = getDB(); const pIdx = db.findIndex(p => p.id === currentProjectId);
             if(pIdx > -1) {
                 if(!db[pIdx].activeUsers) db[pIdx].activeUsers = {};
                 db[pIdx].activeUsers[currentUser] = { time: Date.now(), tab: tabId };
-                saveDB(db); // 同步到 Firebase
+                localStorage.setItem(`app_${currentWorkspace}`, JSON.stringify(db)); 
             }
         }
         syncFromCloud(false, true); 
