@@ -1631,6 +1631,38 @@
     }
     function cancelCustomDuty() { closeModal('custom-duty-modal'); renderItinerary(); }
 
+    // ------ 新增：住宿設定與導航功能 ------
+    function setDailyHotel() {
+        const p = getCurProject();
+        const currentHotel = (p.duties && p.duties[activeDayIndex] && p.duties[activeDayIndex].hotel) || '';
+        const htmlMsg = `請輸入第 ${activeDayIndex + 1} 天的住宿地點：<br><br><input type='text' id='temp-hotel-input' class='form-control' value='${currentHotel}' placeholder='飯店名稱 (留空則為刪除)' style='margin-bottom:0;'>`;
+        
+        showCustomDialog(htmlMsg, true, () => {
+            const inputEl = document.getElementById('temp-hotel-input');
+            if (inputEl) {
+                const hotel = inputEl.value.trim();
+                withLoader(() => {
+                    const p2 = getCurProject();
+                    if(!p2.duties) p2.duties = {};
+                    if(!p2.duties[activeDayIndex]) p2.duties[activeDayIndex] = { driver: '', guide: '' };
+                    p2.duties[activeDayIndex].hotel = hotel;
+                    updateCurProject(p2);
+                    renderItinerary();
+                    showSync(hotel ? "✅ 住宿設定已更新" : "🗑️ 住宿已清除", 1500);
+                });
+            }
+        });
+    }
+
+    function handleHotelAction(hotelName) {
+        // 同時複製並開啟導航
+        copyText(hotelName, "📋 飯店已複製！開啟地圖中...");
+        setTimeout(() => {
+            const gmapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hotelName)}`;
+            window.open(gmapUrl, '_blank');
+        }, 500);
+    }
+    // ------------------------------------
     function renderItinerary() {
       const p = getCurProject(); if(!p || !p.start) return; 
       const start = new Date(p.start); const end = new Date(p.end); const totalDays = Math.max(1, Math.floor((end - start) / 86400000) + 1); const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
@@ -1668,15 +1700,32 @@
         });
       }
       
+    // ------ 產生 住宿 / 待排 / 新增 按鈕 ------
+      const todaysDuty = (p.duties && p.duties[activeDayIndex]) ? p.duties[activeDayIndex] : { driver: '', guide: '', hotel: '' };
+      const hotelName = todaysDuty.hotel || '';
+      
+      let hotelBtnHtml = '';
+      if (hotelName) {
+          hotelBtnHtml = `
+          <div style="display:flex; align-items:center; background:#FFFDE7; border:1px solid #FDE047; border-radius:10px; padding:2px 4px 2px 10px;">
+              <span style="color:#B45309; font-weight:800; font-size:12px; cursor:pointer; max-width: 95px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="handleHotelAction('${hotelName.replace(/'/g, "\\'")}')" title="點擊導航與複製">🏨 ${hotelName}</span>
+              <span style="cursor:pointer; padding:4px; font-size:12px; margin-left:4px; border-left:1px solid #FDE047;" onclick="setDailyHotel()" title="修改住宿">✏️</span>
+          </div>`;
+      } else {
+          hotelBtnHtml = `<button class="btn-small" style="background:#F8F9FA; color:var(--text-muted); font-weight:800; border:1px dashed #CBD5E1; border-radius:10px; padding:6px 10px; font-size:12px; box-shadow:none; cursor:pointer; display:inline-flex; align-items:center;" onclick="setDailyHotel()">🏨 住宿</button>`;
+      }
+
       const headerBtns = document.getElementById('itinerary-header-actions');
       if (headerBtns) {
           headerBtns.innerHTML = `
+              ${hotelBtnHtml}
               <button class="btn-small" style="background:#F8FAFC; color:var(--secondary); font-weight:800; border:1px solid #CBD5E1; border-radius:10px; padding:6px 10px; font-size:12px; box-shadow:none; cursor:pointer; display:inline-flex; align-items:center; position: relative;" onclick="openWishlistModal()">🎒 待排 ${wishlistBadge}</button>
               <button class="btn-small" style="background:var(--primary); color:white; font-weight:800; border:none; display:inline-flex; align-items:center; gap:4px; padding:6px 12px; border-radius:10px; cursor:pointer; box-shadow: 0 2px 8px rgba(255,90,95,0.3);" onclick="showAddPlanForm()"><span style="font-size:14px; margin-right:2px; line-height:1;">+</span> 新增</button>
           `;
+          headerBtns.style.flexWrap = 'wrap';
+          headerBtns.style.justifyContent = 'flex-end';
       }
 
-      const todaysDuty = (p.duties && p.duties[activeDayIndex]) ? p.duties[activeDayIndex] : { driver: '', guide: '' };
       const dutyDriverEl = document.getElementById('duty-driver'); if (dutyDriverEl) dutyDriverEl.value = todaysDuty.driver || '';
       const dutyGuideEl = document.getElementById('duty-guide'); if (dutyGuideEl) dutyGuideEl.value = todaysDuty.guide || '';
       const dutyDriverTextEl = document.getElementById('duty-driver-text'); if (dutyDriverTextEl) dutyDriverTextEl.textContent = todaysDuty.driver || '無';
