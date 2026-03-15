@@ -1632,38 +1632,116 @@ function switchTab(tabId) {
     }
     function cancelCustomDuty() { closeModal('custom-duty-modal'); renderItinerary(); }
 
-    // ------ 新增：住宿設定與導航功能 ------
+// ------ 新增：住宿與航班設定、顯示功能 ------
     function setDailyHotel() {
         const p = getCurProject();
-        const currentHotel = (p.duties && p.duties[activeDayIndex] && p.duties[activeDayIndex].hotel) || '';
-        const htmlMsg = `請輸入第 ${activeDayIndex + 1} 天的住宿地點：<br><br><input type='text' id='temp-hotel-input' class='form-control' value='${currentHotel}' placeholder='飯店名稱 (留空則為刪除)' style='margin-bottom:0;'>`;
-        
+        let hotelObj = (p.duties && p.duties[activeDayIndex] && p.duties[activeDayIndex].hotel) || {};
+        let currentName = typeof hotelObj === 'string' ? hotelObj : (hotelObj.name || '');
+        let currentUrl = typeof hotelObj === 'string' ? '' : (hotelObj.url || '');
+
+        const htmlMsg = `
+            <div style="text-align:left;">
+                <h4 style="margin-bottom:12px; color:var(--text-main);">設定第 ${activeDayIndex + 1} 天住宿</h4>
+                <label style="font-size:12px; font-weight:bold; color:var(--text-muted);">住宿名稱 (留空則為刪除)：</label>
+                <input type='text' id='temp-hotel-name' class='form-control' value='${currentName}' placeholder='例如: 城景國際' style='margin-top:4px;'>
+                <label style="font-size:12px; font-weight:bold; color:var(--text-muted);">Google Maps 網址 (選填)：</label>
+                <input type='text' id='temp-hotel-url' class='form-control' value='${currentUrl}' placeholder='貼上自訂的地圖連結...' style='margin-top:4px; margin-bottom:0;'>
+            </div>
+        `;
+
         showCustomDialog(htmlMsg, true, () => {
-            const inputEl = document.getElementById('temp-hotel-input');
-            if (inputEl) {
-                const hotel = inputEl.value.trim();
+            const nameEl = document.getElementById('temp-hotel-name');
+            const urlEl = document.getElementById('temp-hotel-url');
+            if (nameEl) {
+                const name = nameEl.value.trim();
+                const url = urlEl ? urlEl.value.trim() : '';
                 withLoader(() => {
                     const p2 = getCurProject();
                     if(!p2.duties) p2.duties = {};
                     if(!p2.duties[activeDayIndex]) p2.duties[activeDayIndex] = { driver: '', guide: '' };
-                    p2.duties[activeDayIndex].hotel = hotel;
+
+                    if (name) p2.duties[activeDayIndex].hotel = { name: name, url: url };
+                    else p2.duties[activeDayIndex].hotel = null;
+                    
                     updateCurProject(p2);
                     renderItinerary();
-                    showSync(hotel ? "✅ 住宿設定已更新" : "🗑️ 住宿已清除", 1500);
+                    showSync(name ? "✅ 住宿設定已更新" : "🗑️ 住宿已清除", 1500);
                 });
             }
         });
     }
 
-    function handleHotelAction(hotelName) {
-        // 同時複製並開啟導航
-        copyText(hotelName, "📋 飯店已複製！開啟地圖中...");
-        setTimeout(() => {
-            const gmapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hotelName)}`;
-            window.open(gmapUrl, '_blank');
-        }, 500);
+    function setDailyFlight(isFirstDay) {
+        const p = getCurProject();
+        const flightLabel = isFirstDay ? '出發航班/交通' : '回程航班/交通';
+        let flightObj = (p.duties && p.duties[activeDayIndex] && p.duties[activeDayIndex].flight) || {};
+        let currentName = flightObj.name || '';
+        let currentTime = flightObj.time || '';
+        let currentUrl = flightObj.url || '';
+
+        const htmlMsg = `
+            <div style="text-align:left;">
+                <h4 style="margin-bottom:12px; color:var(--text-main);">設定${flightLabel}</h4>
+                <label style="font-size:12px; font-weight:bold; color:var(--text-muted);">航班名稱 (留空為刪除)：</label>
+                <input type='text' id='temp-flight-name' class='form-control' value='${currentName}' placeholder='例如: 星宇 JX800' style='margin-top:4px;'>
+                <label style="font-size:12px; font-weight:bold; color:var(--text-muted);">起飛/出發時間：</label>
+                <input type='time' id='temp-flight-time' class='form-control' value='${currentTime}' style='margin-top:4px;'>
+                <label style="font-size:12px; font-weight:bold; color:var(--text-muted);">參考網址 (選填)：</label>
+                <input type='text' id='temp-flight-url' class='form-control' value='${currentUrl}' placeholder='貼上報到網址...' style='margin-top:4px; margin-bottom:0;'>
+            </div>
+        `;
+
+        showCustomDialog(htmlMsg, true, () => {
+            const nameEl = document.getElementById('temp-flight-name');
+            const timeEl = document.getElementById('temp-flight-time');
+            const urlEl = document.getElementById('temp-flight-url');
+            if (nameEl) {
+                const name = nameEl.value.trim();
+                const time = timeEl ? timeEl.value : '';
+                const url = urlEl ? urlEl.value.trim() : '';
+                withLoader(() => {
+                    const p2 = getCurProject();
+                    if(!p2.duties) p2.duties = {};
+                    if(!p2.duties[activeDayIndex]) p2.duties[activeDayIndex] = { driver: '', guide: '' };
+
+                    if (name) p2.duties[activeDayIndex].flight = { name: name, time: time, url: url };
+                    else p2.duties[activeDayIndex].flight = null;
+
+                    updateCurProject(p2);
+                    renderItinerary();
+                    showSync(name ? "✅ 航班設定已更新" : "🗑️ 航班已清除", 1500);
+                });
+            }
+        });
+    }
+
+    function showHotelDetails(name, url) {
+        let linkHtml = url ? `<a href="${url}" target="_blank" class="btn btn-action" style="width:100%; margin-top:12px; text-decoration:none; display:flex; justify-content:center; padding:12px; font-size:14px; box-shadow:none;">🗺️ 開啟自訂網址導航</a>` : `<div style="font-size:12px; color:var(--text-muted); margin-top:12px; text-align:center;">(未提供自訂網址)</div>`;
+        showCustomDialog(`
+            <div style="text-align:center;">
+                <div style="font-size:40px; margin-bottom:8px;">🏨</div>
+                <h3 style="margin-bottom:4px; color:var(--text-main); font-weight:900;">${name}</h3>
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">點擊下方按鈕前往導航，或複製名稱自行搜尋。</p>
+                <button class="btn-outline" style="width:100%; padding:12px; font-size:14px; font-weight:bold; border-radius:12px;" onclick="copyText('${name}', '📋 住宿名稱已複製')">📋 複製名稱</button>
+                ${linkHtml}
+            </div>
+        `);
+    }
+
+    function showFlightDetails(name, time, url, isFirstDay) {
+        let linkHtml = url ? `<a href="${url}" target="_blank" class="btn btn-action" style="width:100%; margin-top:12px; text-decoration:none; display:flex; justify-content:center; padding:12px; font-size:14px; box-shadow:none;">🔗 開啟報到/相關網頁</a>` : `<div style="font-size:12px; color:var(--text-muted); margin-top:12px; text-align:center;">(未提供自訂網址)</div>`;
+        showCustomDialog(`
+            <div style="text-align:center;">
+                <div style="font-size:40px; margin-bottom:8px;">${isFirstDay ? '🛫' : '🛬'}</div>
+                <h3 style="margin-bottom:4px; color:var(--text-main); font-weight:900;">${name}</h3>
+                ${time ? `<div style="font-size:16px; font-weight:bold; color:var(--primary); margin-bottom:16px;">時間: ${time}</div>` : ''}
+                <button class="btn-outline" style="width:100%; padding:12px; font-size:14px; font-weight:bold; border-radius:12px;" onclick="copyText('${name}', '📋 航班已複製')">📋 複製名稱</button>
+                ${linkHtml}
+            </div>
+        `);
     }
     // ------------------------------------
+    
     function renderItinerary() {
       const p = getCurProject(); if(!p || !p.start) return; 
       const start = new Date(p.start); const end = new Date(p.end); const totalDays = Math.max(1, Math.floor((end - start) / 86400000) + 1); const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
@@ -1701,30 +1779,60 @@ function switchTab(tabId) {
         });
       }
       
-    // ------ 產生 住宿 / 待排 / 新增 按鈕 (修正跑版) ------
-      const todaysDuty = (p.duties && p.duties[activeDayIndex]) ? p.duties[activeDayIndex] : { driver: '', guide: '', hotel: '' };
-      const hotelName = todaysDuty.hotel || '';
+ // ------ 產生 航班 / 住宿 / 待排 / 新增 按鈕 ------
+      const isFirstDay = (activeDayIndex === 0);
+      const isLastDay = (activeDayIndex === totalDays - 1);
       
+      const todaysDuty = (p.duties && p.duties[activeDayIndex]) ? p.duties[activeDayIndex] : { driver: '', guide: '', hotel: null, flight: null };
+      
+      // 解析住宿資料
+      let hotelObj = todaysDuty.hotel;
+      let hotelName = ''; let hotelUrl = '';
+      if (typeof hotelObj === 'string') { hotelName = hotelObj; }
+      else if (hotelObj) { hotelName = hotelObj.name || ''; hotelUrl = hotelObj.url || ''; }
+
+      // 解析航班資料
+      let flightObj = todaysDuty.flight;
+      let flightName = ''; let flightTime = ''; let flightUrl = '';
+      if (flightObj) { flightName = flightObj.name || ''; flightTime = flightObj.time || ''; flightUrl = flightObj.url || ''; }
+      
+      // 組合住宿按鈕
       let hotelBtnHtml = '';
       if (hotelName) {
           hotelBtnHtml = `
           <div style="display:flex; align-items:center; background:#FFFDE7; border:1px solid #FDE047; border-radius:10px; padding:2px 4px 2px 10px; flex-shrink: 0;">
-              <span style="color:#B45309; font-weight:800; font-size:12px; cursor:pointer; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="handleHotelAction('${hotelName.replace(/'/g, "\\'")}')" title="點擊導航與複製">🏨 ${hotelName}</span>
-              <span style="cursor:pointer; padding:4px; font-size:12px; margin-left:4px; border-left:1px solid #FDE047;" onclick="setDailyHotel()" title="修改住宿">✏️</span>
+              <span style="color:#B45309; font-weight:800; font-size:12px; cursor:pointer; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="showHotelDetails('${hotelName.replace(/'/g, "\\'")}', '${hotelUrl.replace(/'/g, "\\'")}')" title="點擊查看住宿">🏨 住宿: ${hotelName}</span>
+              <span style="cursor:pointer; padding:4px; font-size:12px; margin-left:4px; border-left:1px solid #FDE047;" onclick="setDailyHotel()">✏️</span>
           </div>`;
       } else {
           hotelBtnHtml = `<button class="btn-small" style="background:#F8F9FA; color:var(--text-muted); font-weight:800; border:1px dashed #CBD5E1; border-radius:10px; padding:6px 10px; font-size:12px; box-shadow:none; cursor:pointer; display:inline-flex; align-items:center; flex-shrink: 0;" onclick="setDailyHotel()">🏨 住宿</button>`;
       }
 
+      // 組合航班按鈕 (僅在第一天與最後一天顯示)
+      let flightBtnHtml = '';
+      if (isFirstDay || isLastDay) {
+          let fIcon = isFirstDay ? '🛫 出發' : '🛬 回程';
+          if (flightName) {
+              let fDisplay = flightTime ? `${flightTime} ${flightName}` : flightName;
+              flightBtnHtml = `
+              <div style="display:flex; align-items:center; background:#E8F4FD; border:1px solid #BAE6FD; border-radius:10px; padding:2px 4px 2px 10px; flex-shrink: 0;">
+                  <span style="color:#0284C7; font-weight:800; font-size:12px; cursor:pointer; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="showFlightDetails('${flightName.replace(/'/g, "\\'")}', '${flightTime}', '${flightUrl.replace(/'/g, "\\'")}', ${isFirstDay})" title="點擊查看航班">✈️ ${fDisplay}</span>
+                  <span style="cursor:pointer; padding:4px; font-size:12px; margin-left:4px; border-left:1px solid #BAE6FD;" onclick="setDailyFlight(${isFirstDay})">✏️</span>
+              </div>`;
+          } else {
+              flightBtnHtml = `<button class="btn-small" style="background:#F8F9FA; color:var(--text-muted); font-weight:800; border:1px dashed #CBD5E1; border-radius:10px; padding:6px 10px; font-size:12px; box-shadow:none; cursor:pointer; display:inline-flex; align-items:center; flex-shrink: 0;" onclick="setDailyFlight(${isFirstDay})">${fIcon}</button>`;
+          }
+      }
+
       const headerBtns = document.getElementById('itinerary-header-actions');
       if (headerBtns) {
           headerBtns.innerHTML = `
+              ${flightBtnHtml}
               ${hotelBtnHtml}
               <button class="btn-small" style="background:#F8FAFC; color:var(--secondary); font-weight:800; border:1px solid #CBD5E1; border-radius:10px; padding:6px 10px; font-size:12px; box-shadow:none; cursor:pointer; display:inline-flex; align-items:center; position: relative; flex-shrink: 0;" onclick="openWishlistModal()">🎒 待排 ${wishlistBadge}</button>
               <button class="btn-small" style="background:var(--primary); color:white; font-weight:800; border:none; display:inline-flex; align-items:center; gap:4px; padding:6px 12px; border-radius:10px; cursor:pointer; box-shadow: 0 2px 8px rgba(255,90,95,0.3); flex-shrink: 0;" onclick="showAddPlanForm()"><span style="font-size:14px; margin-right:2px; line-height:1;">+</span> 新增</button>
           `;
           
-          // 修正跑版邏輯：強制讓按鈕列獨立成一排，對齊右邊
           const dateHeader = document.querySelector('.itinerary-date-header');
           if (dateHeader) {
               dateHeader.style.flexWrap = 'wrap';
@@ -1732,8 +1840,8 @@ function switchTab(tabId) {
           headerBtns.style.width = '100%';
           headerBtns.style.marginTop = '4px';
           headerBtns.style.flexWrap = 'nowrap';
-          headerBtns.style.justifyContent = 'flex-end';
-          headerBtns.style.overflowX = 'auto'; // 允許橫向微滑動，防止螢幕過小變形
+          headerBtns.style.justifyContent = 'flex-start'; // 改靠左對齊，方便手機滑動
+          headerBtns.style.overflowX = 'auto'; // 允許橫向微滑動
           headerBtns.style.paddingBottom = '4px'; // 預留給按鈕陰影的空間
           headerBtns.style.scrollbarWidth = 'none'; // 隱藏滾動條美化
       }
