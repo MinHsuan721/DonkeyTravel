@@ -1139,7 +1139,7 @@
     let unsubscribeData = null;
     let isInitialLoad = true;
 
-    function startAutoSync() {
+function startAutoSync() {
         showSync("☁️ 啟動即時雲端連線...", 1500);
 
         // 1. 即時監聽帳號名單
@@ -1154,6 +1154,41 @@
                 const adminList = document.getElementById('admin-user-list'); if(adminList && adminList.innerHTML !== '') renderAdminUsers();
             }
         });
+
+        // 2. 即時監聽行程資料 (秒級同步 + 防寫入覆蓋)
+        if(unsubscribeData) unsubscribeData();
+        unsubscribeData = fsDb.collection('workspaces').doc(currentWorkspace).onSnapshot(doc => {
+            // ⚠️ 修正：遇到防護機制時，也要確實關閉載入動畫！
+            if (doc.metadata.hasPendingWrites) {
+                if (isInitialLoad) { isInitialLoad = false; const loader = document.getElementById('global-loader'); if (loader) loader.classList.remove('active'); }
+                return;
+            }
+
+            if(doc.exists && doc.data().data) {
+                let newDataString = doc.data().data;
+                if (newDataString.includes('魏敏轩')) newDataString = newDataString.replace(/魏敏轩/g, '魏敏軒');
+                const oldDataString = localStorage.getItem(`app_${currentWorkspace}`); 
+                
+                if (oldDataString !== newDataString) {
+                    localStorage.setItem(`app_${currentWorkspace}`, newDataString); 
+                    getDB(); 
+                    if(currentProjectId) { 
+                        safeRenderAll(); updateOnlineUsers(); 
+                        if (document.getElementById('tab-map') && document.getElementById('tab-map').classList.contains('active')) renderMapRoute(); 
+                    } 
+                    renderDashboard();
+                }
+            }
+            if (isInitialLoad) {
+                isInitialLoad = false;
+                const loader = document.getElementById('global-loader'); 
+                if (loader) loader.classList.remove('active');
+            }
+        }, error => {
+            console.error("同步連線中斷:", error);
+            if (isInitialLoad) { isInitialLoad = false; const loader = document.getElementById('global-loader'); if (loader) loader.classList.remove('active'); }
+        });
+    }
 
         // 2. 即時監聽行程資料 (秒級同步 + 防寫入覆蓋)
         if(unsubscribeData) unsubscribeData();
@@ -1924,28 +1959,31 @@ function switchTab(tabId) {
           html += `<button class="btn btn-action hide-in-archive hide-in-export" style="width: 100%; padding: 14px; border-radius: 16px; margin-top: 12px; margin-bottom: 20px; font-size: 16px; color: white !important; box-shadow: 0 4px 12px rgba(0,166,153,0.2);" onclick="showAddPlanForm()">➕ 建立新行程</button>`;
           list.innerHTML = html;
           
-          if(p.status !== 'archived' && typeof Sortable !== 'undefined') {
+         if(p.status !== 'archived' && typeof Sortable !== 'undefined') {
               if(sortableInstance) sortableInstance.destroy();
               sortableInstance = new Sortable(list, {
                   handle: '.drag-handle', 
-                  draggable: '.plan-row', // 👈 加上防護，嚴禁拖曳到交通區塊
+                  draggable: '.plan-row', 
                   animation: 150, delay: 150, delayOnTouchOnly: true, ghostClass: 'sortable-ghost',
                   onEnd: function (evt) {
-                      if (evt.oldDraggableIndex === evt.newDraggableIndex) return; // 👈 使用防呆的 DraggableIndex 計算
                       withLoader(() => {
                           const curP = getCurProject();
                           const curDayPlans = (curP.plans || []).filter(pl => pl && pl.dayIdx === activeDayIndex).sort((a,b)=>(a.time || '').localeCompare(b.time || ''));
+                          const timeSlots = curDayPlans.map(pl => pl.time).sort(); // 提取所有原有的時間點
                           
-                          const timeSlots = curDayPlans.map(pl => pl.time);
-                          const movedItem = curDayPlans.splice(evt.oldDraggableIndex, 1)[0];
-                          curDayPlans.splice(evt.newDraggableIndex, 0, movedItem);
+                          // ⚠️ 終極修復：不依賴套件算出的危險編號，直接讀取拖曳後「畫面上真實的順序」
+                          const rowEls = Array.from(list.querySelectorAll('.plan-row'));
+                          const newOrderIds = rowEls.map(el => parseInt(el.getAttribute('data-id')));
                           
-                          for (let i = 0; i < curDayPlans.length; i++) {
-                              curDayPlans[i].time = timeSlots[i];
-                          }
+                          // 根據畫面新順序，重新賦予時間，絕對不會出錯
+                          newOrderIds.forEach((id, index) => {
+                              const planIdx = curP.plans.findIndex(x => x && x.id === id);
+                              if (planIdx > -1 && timeSlots[index]) {
+                                  curP.plans[planIdx].time = timeSlots[index];
+                              }
+                          });
                           
-                          curDayPlans.forEach(cp => { const idx = curP.plans.findIndex(x => x && x.id === cp.id); if (idx > -1) curP.plans[idx].time = cp.time; });
-                          updateCurProject(curP); renderItinerary(); showSync("✅ 行程已重新排序換位", 1500);
+                          updateCurProject(curP); renderItinerary(); showSync("✅ 行程已重新排序", 1500);
                       }, 100);
                   }
               });
