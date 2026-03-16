@@ -905,7 +905,7 @@
   </div>
 
   <script>
- // ==========================================
+    // ==========================================
     // 🚀 Firebase 初始化區塊
     // ==========================================
     const firebaseConfig = {
@@ -1024,7 +1024,7 @@
     function copyText(text, successMsg = "📋 已複製") {
         var textArea = document.createElement("textarea"); textArea.value = text; textArea.style.top = "0"; textArea.style.left = "0"; textArea.style.position = "fixed";
         document.body.appendChild(textArea); textArea.focus(); textArea.select();
-        try { if (document.execCommand('copy')) showSync(successMsg, 1500); else showSync("⚠️ 複製失敗，請手動複製", 2000); } catch (err) { showSync("⚠️ 複製失敗，請手動複製", 2000); }
+        try { if (document.execCommand('copy')) showSync(successMsg, 1500); else showSync("⚠️ 複製失敗，請手動複製", 2000); } catch (err) { showSync("⚠️ 複製失敗，請手手動複製", 2000); }
         document.body.removeChild(textArea);
     }
 
@@ -1139,7 +1139,7 @@
     let unsubscribeData = null;
     let isInitialLoad = true;
 
-function startAutoSync() {
+    function startAutoSync() {
         showSync("☁️ 啟動即時雲端連線...", 1500);
 
         // 1. 即時監聽帳號名單
@@ -1177,38 +1177,6 @@ function startAutoSync() {
                         if (document.getElementById('tab-map') && document.getElementById('tab-map').classList.contains('active')) renderMapRoute(); 
                     } 
                     renderDashboard();
-                }
-            }
-            if (isInitialLoad) {
-                isInitialLoad = false;
-                const loader = document.getElementById('global-loader'); 
-                if (loader) loader.classList.remove('active');
-            }
-        }, error => {
-            console.error("同步連線中斷:", error);
-            if (isInitialLoad) { isInitialLoad = false; const loader = document.getElementById('global-loader'); if (loader) loader.classList.remove('active'); }
-        });
-    }
-
-        // 2. 即時監聽行程資料 (秒級同步 + 防寫入覆蓋)
-        if(unsubscribeData) unsubscribeData();
-        unsubscribeData = fsDb.collection('workspaces').doc(currentWorkspace).onSnapshot(doc => {
-            if(doc.exists && doc.data().data) {
-                // ⚠️ 終極防護：如果你正在新增或修改資料，忽略雲端的舊廣播，防止心血被洗掉！
-                if (doc.metadata.hasPendingWrites) return;
-
-                let newDataString = doc.data().data;
-                if (newDataString.includes('魏敏轩')) newDataString = newDataString.replace(/魏敏轩/g, '魏敏軒');
-                const oldDataString = localStorage.getItem(`app_${currentWorkspace}`); 
-                
-                if (oldDataString !== newDataString) {
-                    localStorage.setItem(`app_${currentWorkspace}`, newDataString); 
-                    getDB(); 
-                    if(currentProjectId) { 
-                        safeRenderAll(); updateOnlineUsers(); 
-                        if (document.getElementById('tab-map') && document.getElementById('tab-map').classList.contains('active')) renderMapRoute(); 
-                    } 
-                    renderDashboard();
                     if (!isInitialLoad) showSync("🔄 收到最新同步資料", 1500);
                 }
             }
@@ -1219,6 +1187,7 @@ function startAutoSync() {
             }
         }, error => {
             console.error("同步連線中斷:", error);
+            if (isInitialLoad) { isInitialLoad = false; const loader = document.getElementById('global-loader'); if (loader) loader.classList.remove('active'); }
         });
     }
 
@@ -1959,7 +1928,7 @@ function switchTab(tabId) {
           html += `<button class="btn btn-action hide-in-archive hide-in-export" style="width: 100%; padding: 14px; border-radius: 16px; margin-top: 12px; margin-bottom: 20px; font-size: 16px; color: white !important; box-shadow: 0 4px 12px rgba(0,166,153,0.2);" onclick="showAddPlanForm()">➕ 建立新行程</button>`;
           list.innerHTML = html;
           
-         if(p.status !== 'archived' && typeof Sortable !== 'undefined') {
+          if(p.status !== 'archived' && typeof Sortable !== 'undefined') {
               if(sortableInstance) sortableInstance.destroy();
               sortableInstance = new Sortable(list, {
                   handle: '.drag-handle', 
@@ -1969,13 +1938,11 @@ function switchTab(tabId) {
                       withLoader(() => {
                           const curP = getCurProject();
                           const curDayPlans = (curP.plans || []).filter(pl => pl && pl.dayIdx === activeDayIndex).sort((a,b)=>(a.time || '').localeCompare(b.time || ''));
-                          const timeSlots = curDayPlans.map(pl => pl.time).sort(); // 提取所有原有的時間點
+                          const timeSlots = curDayPlans.map(pl => pl.time).sort(); 
                           
-                          // ⚠️ 終極修復：不依賴套件算出的危險編號，直接讀取拖曳後「畫面上真實的順序」
                           const rowEls = Array.from(list.querySelectorAll('.plan-row'));
                           const newOrderIds = rowEls.map(el => parseInt(el.getAttribute('data-id')));
                           
-                          // 根據畫面新順序，重新賦予時間，絕對不會出錯
                           newOrderIds.forEach((id, index) => {
                               const planIdx = curP.plans.findIndex(x => x && x.id === id);
                               if (planIdx > -1 && timeSlots[index]) {
@@ -2453,7 +2420,7 @@ function switchTab(tabId) {
             if(lat && lng) {
                 if(input) input.value = '';
                 if(map) { map.setView([lat, lng], 16); if(activeClickMarker) map.removeLayer(activeClickMarker); activeClickMarker = L.marker([lat, lng], {icon: createCustomMapIcon()}).addTo(map); }
-                openBottomSheet(placeName, "來自 Google Maps 網址", lat, lng); showSync("✅ 解析成功！", 1500);
+                openBottomSheet(placeName, "來自 Google Maps 網址",lat, lng); showSync("✅ 解析成功！", 1500);
             } else { showCustomDialog("無法解析此網址的座標，請確認網址內包含 @經度,緯度！"); }
         }, 600);
     }
