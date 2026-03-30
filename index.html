@@ -1729,9 +1729,12 @@ function switchTab(tabId) {
         const iconEl = document.getElementById('trip-icon'); if(iconEl) iconEl.value = '📍'; const colorEl = document.getElementById('trip-color'); if(colorEl) colorEl.value = '#FF5A5F'; 
         try { const dateEl = document.getElementById('trip-date-range'); if(dateEl && dateEl._flatpickr) dateEl._flatpickr.clear(); } catch(e) {}
         const searchEl = document.getElementById('member-search-input'); if(searchEl) searchEl.value = '';
-        var coverPreview = document.getElementById('trip-cover-preview');
-        if(p.coverImage && coverPreview) { coverPreview.src = p.coverImage; coverPreview.style.display = 'block'; coverPreview.style.objectPosition = p.coverPosition || 'center'; var posCtrl2 = document.getElementById('trip-cover-pos-controls'); if(posCtrl2) posCtrl2.style.display = 'block'; tripCoverPosition = p.coverPosition || 'center'; }
-        else if(coverPreview) { coverPreview.style.display = 'none'; var posCtrl3 = document.getElementById('trip-cover-pos-controls'); if(posCtrl3) posCtrl3.style.display = 'none'; }
+      var coverPreview = document.getElementById('trip-cover-preview');
+        if(coverPreview) { coverPreview.style.display = 'none'; coverPreview.src = ''; }
+        var posCtrl = document.getElementById('trip-cover-pos-controls');
+        if(posCtrl) posCtrl.style.display = 'none';
+        var coverInput = document.getElementById('trip-cover-input');
+        if(coverInput) { coverInput.value = ''; delete coverInput.dataset.base64; }
         const list = document.getElementById('create-trip-invite-list');
         if(list) list.innerHTML = allMembers.filter(m => m !== currentUser).map(m => `<label class="checkbox-item member-checkbox-row" data-name="${m}" style="padding:8px 4px; border-bottom:1px solid #E4E8ED; display:flex; justify-content:space-between;"><span style="font-weight:bold; font-size:14px;">${m}</span><input type="checkbox" value="${m}" class="trip-invite-checkbox" style="width:18px; height:18px; accent-color:var(--primary);"></label>`).join('');
         openModal('add-modal');
